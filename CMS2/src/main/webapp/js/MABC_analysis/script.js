@@ -1167,6 +1167,8 @@ function initAnimation() {
 // ------------------------------------------------------
 //                         모달
 // ------------------------------------------------------
+var cnt=0;
+
 function drawModalGraph(_graphName) {
 
 
@@ -1356,17 +1358,19 @@ function drawModalGraph(_graphName) {
         modalGraph.style.marginRight = marinLeft + 60 + "px";
     }
 
-    var mabcModalSelect = document.querySelector(".mabcModalSelect");
-    for (var key in chartDataArr) {
-        var selectOption = document.createElement('option');
-        selectOption.innerText = key;
-        selectOption.classList.add("modalSelectOption");
-        if (_graphName == key) {
-            selectOption.setAttribute("selected", true);
-        }
-        mabcModalSelect.appendChild(selectOption);
-    }
-
+	if(cnt==0){
+	    var mabcModalSelect = document.querySelector(".mabcModalSelect");
+	    for (var key in chartDataArr) {
+	        var selectOption = document.createElement('option');
+	        selectOption.innerText = key;
+	        selectOption.classList.add("modalSelectOption");
+	        if (_graphName == key) {
+	            selectOption.setAttribute("selected", true);
+	        }
+	        mabcModalSelect.appendChild(selectOption);
+	    }
+	}
+	cnt++;
 }
 function closeMOdal() {
     var modal = document.querySelector(".modal");
