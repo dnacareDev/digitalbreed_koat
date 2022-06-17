@@ -19,6 +19,8 @@
 	<script src="/digit/vendor/html2canvas.js"></script>
 	<script src="/digit/vendor/jquery-3.6.0.js"></script>
 	<script src="/digit/vendor/xlsxCdn.js"></script>
+    <script src="/digit/vendor/xlsx.full.min.js"></script>
+    <script src="/digit/vendor/FileSaver.min.js"></script>
     <script src="/digit/vendor/makeXlsx.js"></script>
     <script src="/digit/vendor/makeXlsxFile.js"></script>
     <script src="/digit/js/nav.js"></script>
@@ -452,6 +454,9 @@
 	{
 		SelectMarkerVersion("고추");
 	});
+
+	//전역변수
+	var GeneticDB = [];
 	
 	$("#crop_selection").change(function()
 	{

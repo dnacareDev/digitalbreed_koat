@@ -21,6 +21,8 @@
     <script src="/digit/vendor/xlsxCdn.js"></script>
     <script src="/digit/vendor/makeXlsx.js"></script>
     <script src="/digit/vendor/makeXlsxFile.js"></script>
+    <script src="/digit/vendor/xlsx.full.min.js"></script>
+    <script src="/digit/vendor/FileSaver.min.js"></script>
     <script src="/digit/js/MABC_analysis/html2canvas.js"></script>
     <script src="/digit/js/nav.js"></script>
     <script src="/digit/js/alarm.js"></script>
@@ -430,7 +432,10 @@
 		{
 			SelectMarkerVersion("고추");
 		});
-		
+
+		//전역변수
+		var GeneticDB = [];
+
 		$("#crop_selection").change(function()
 		{
 			var marker_crop = $("#crop_selection").val();
@@ -450,6 +455,7 @@
 				data : data,
 				success : function(result)
 				{
+
 					var version_list = $("#genomic_information");
 					var add_list = "";
 					
