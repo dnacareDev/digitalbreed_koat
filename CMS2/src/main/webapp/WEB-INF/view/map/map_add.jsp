@@ -292,7 +292,7 @@
                                             </th>
                                             <th>
                                                 <div>
-                                                    <label>분자표지보유</label>
+                                                    <label>실물분자표지보유</label>
                                                 </div>
                                             </th>
                                         </tr>
