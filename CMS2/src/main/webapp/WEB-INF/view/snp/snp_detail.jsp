@@ -238,16 +238,17 @@
 			    
                 <div class="mab_chr_wrap">
                     <div class="mab_chr_wrap_left" style="overflow-y: scroll; width: 100%;">  <!-- 그래프1 -->
-                    	<h1>Raw Data 통계치</h1>
-						<div id="grid1" style="margin-top:20px; margin-bottom: 10px;"></div>
-						<h1>전처리 결과</h1>
-						<div id="grid2" style="margin-top:20px; margin-bottom: 10px;"></div>
-						<h1>Mapping 결과</h1>
-						<div id="grid3" style="margin-top:20px; margin-bottom: 10px;"></div>
+                    	<h1><b> > Raw Data 통계치</b></h1>
+						<div id="grid1" style="margin-top:5px; margin-bottom: 10px;"></div>
+						<h1><b> > 전처리 결과</b></h1>
+						<div id="grid2" style="margin-top:5px; margin-bottom: 10px;"></div>
+						
                     </div>
                     <div class="mab_chr_wrap_left" style="overflow-y: scroll; width: 100%;"> 
-                    	<h1>데이터 결과</h1>
-						<div id="grid4" style="margin-top:20px;"></div>
+					<h1><b> > Mapping 결과</b></h1>
+						<div id="grid3" style="margin-top:5px; margin-bottom: 10px;"></div>
+                    	<h1><b> > 데이터 결과</b></h1>
+						<div id="grid4" style="margin-top:5px;"></div>
                     </div>
                 </div>
                 <input id="file_name" type="hidden" value="<c:out value='${outcome.outcome_file}'/>">
@@ -392,7 +393,8 @@
 	        const grid = new Grid(
 	        {
 	        	el: document.getElementById('grid' + index),
-	        	columns:columns, 
+	        	columns:columns,
+					bodyHeight: 210,
 	        	data: datas
 	        });
 		    
