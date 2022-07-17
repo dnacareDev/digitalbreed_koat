@@ -167,6 +167,9 @@
                     <li class="ui_list" onclick="location.href='/digit/logout'"></li>
                 </ul>
             </div>
+			<!-- <iframe src="http://112.169.69.112:8843/digit/phylogeny" frameborder="0" style="display:block; width:100%; height: 100vh"></iframe>  -->
+			 
+			 
             <section class="data_table_section result_table_section">
                 <h2 class="data_table_title">NGS MABC [NGS MABC]</h2>
                 <div id="list_grid"></div>
@@ -174,6 +177,8 @@
                     <a href="ngs_add"><button class="new_btn same_btn">신규등록</button></a>
                 </div>
             </section>
+             
+            
         </main>
     </div>
     <script type="text/javascript">

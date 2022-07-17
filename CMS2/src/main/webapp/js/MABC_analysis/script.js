@@ -154,7 +154,7 @@ function parsingDataMaker(xlsxData) {
         for (var i = 0; i < bigParseData[key].length; i++) {
             var currentData = bigParseData[key][i];
             var excelTitle_1 = getExcelTitleFromData(currentData, "분자표지명");
-            var excelTitle_3 = getExcelTitleFromData(currentData, "위치");
+            var excelTitle_3 = getExcelTitleFromData(currentData, "위치.bp.");
 
             parseData[currentData[excelTitle_1]] = currentData[excelTitle_3];
         }
@@ -175,7 +175,7 @@ function parsingData(xlsxData, isRun) {
 
             for (var key in xlsxData[i]) {
 
-                if (!key.includes("MAB"))
+                if (key.includes("염색체명") || key.includes("위치(bp)") || key.includes("분자표지명") || key.includes("모본") || key.includes("부본"))
                     continue;
 
 
@@ -216,7 +216,7 @@ function parsingData(xlsxData, isRun) {
                             _pos = 0;*/
                     }
 
-                    if (!key.includes("MAB"))
+                if (key.includes("염색체명") || key.includes("위치(bp)") || key.includes("분자표지명") || key.includes("모본") || key.includes("부본"))
                         continue;
 
                     let gene = xlsxData[i][getExcelTitleFromData(xlsxData[i], "염색체")];
@@ -270,12 +270,9 @@ function parsingData(xlsxData, isRun) {
                         // name: xlsxData[i][" "]
                     });
 
-
-
                 } catch {
                     console.error(i + "_index mabc parse Error")
                 }
-
             }
 
 
@@ -428,12 +425,10 @@ function buildGraph() {
         graphWrap.appendChild(graphElName);
     }
 
-
     var count = 0;
 
     // 클 틀 생성
     for (var key in chartDataArr) {
-        // 좌측 컬럼 이름, 엄마 아빠 
         if (count == 0) {
             var chrNameBar = document.createElement('div');
             var chrNameDefault = document.createElement('div');
@@ -1167,8 +1162,8 @@ function initAnimation() {
 // ------------------------------------------------------
 //                         모달
 // ------------------------------------------------------
-var cnt=0;
 
+var cnt=0;
 function drawModalGraph(_graphName) {
 
 
@@ -1359,16 +1354,16 @@ function drawModalGraph(_graphName) {
     }
 
 	if(cnt==0){
-	    var mabcModalSelect = document.querySelector(".mabcModalSelect");
-	    for (var key in chartDataArr) {
-	        var selectOption = document.createElement('option');
-	        selectOption.innerText = key;
-	        selectOption.classList.add("modalSelectOption");
-	        if (_graphName == key) {
-	            selectOption.setAttribute("selected", true);
-	        }
-	        mabcModalSelect.appendChild(selectOption);
-	    }
+		var mabcModalSelect = document.querySelector(".mabcModalSelect");
+		for (var key in chartDataArr) {
+			var selectOption = document.createElement('option');
+			selectOption.innerText = key;
+			selectOption.classList.add("modalSelectOption");
+			if (_graphName == key) {
+				selectOption.setAttribute("selected", true);
+			}
+			mabcModalSelect.appendChild(selectOption);
+		}
 	}
 	cnt++;
 }
@@ -1378,8 +1373,6 @@ function closeMOdal() {
 }
 function onChangeModalSelect() {
     var mabcModalSelect = document.querySelector(".mabcModalSelect");
-
-
     drawModalGraph(mabcModalSelect.options[mabcModalSelect.selectedIndex].innerText)
 }
 function onClickZoom(isZoomIn) {

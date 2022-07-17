@@ -33,10 +33,6 @@
 </head>
 <body>
     <div id="wrap">
-	    <div style="position:absolute; left:50px; bottom:150px; display: block;">
-	   		 len
-	     	<input type="file" onchange="onChangeLen()" class="addMabcFile" id="len_file">
-     	</div>
         <div class="tb_blank"></div>
 		<header id="header">
 			<div class="logo1">
