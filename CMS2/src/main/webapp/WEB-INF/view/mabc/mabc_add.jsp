@@ -395,6 +395,7 @@
 			data : data,
 			success : function(result)
 			{
+				//console.log(result, "aaaaaa");
                 var lenURL = "";
                 result.map(item => {
                     if(item.marker_file_type == 1){

@@ -241,8 +241,7 @@ public class LoginController
              tm.setTargetType("string");
              tm.setTargetString("이메일,고객명,휴대폰Æ"+user_username+","+user_username+","+"000-000-0000Æ");
              tm.setFileOneToOne("[$email]≠["+user_username+"]ø[$name]≠["+user_username+"]ø[$cellPhone]≠[000-000-0000]");
-             String result_mail = tms.send(tm); 
-             System.out.println("rst : " + rst);			
+             String result_mail = tms.send(tm);              		
 		}
 		
 		return result;

@@ -1780,7 +1780,7 @@ function initVisualWrap(){
                             <label class="tablePos">Pos</label>
                         </th>
                         <th>
-                            <label>분자표지보유</label>
+                            <label>실물분자표지보유</label>
                         </th>
                     </tr>
                 </thead>

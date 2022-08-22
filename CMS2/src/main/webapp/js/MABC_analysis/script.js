@@ -7,11 +7,13 @@ var curLoadedData = {};
 var xlsxData = {};
 var graphWrap = document.querySelector(".graphWrap");
 var chartDataArr = {};
+var chartDataArr2 = {};
 var chrTotalData = {};
 var chrTotalIndex = 0;
 var chrTotalCount = {};
 var chrTotalAllCount = {};
 var chrPercent = {};
+var chrPercent2 = {};
 var clickX = 0;
 var clickY = 0;
 var lengthData = [];
@@ -65,9 +67,10 @@ function parseLenData(data) {
         for (var i = 0; i < newLengthData.length; i++) {
             if (!newLengthData[i]) { continue }
             var lengthEl = newLengthData[i].split(" ");
-
-
-            let chr = lengthEl[0];
+			
+			//console.log(lengthEl, "lengthEl");
+            
+			let chr = lengthEl[0];
             // if(chr[3] == "0"){
             //     chr = chr.split("");
             //     chr.splice(3, 1);
@@ -97,11 +100,14 @@ function readExcel() {
             event.target.value = null;
             return
         };
+
+		//debugger;
+
         document.querySelector(".file_text").value = input.files[0].name;
         var data = reader.result;
         var workBook = XLSX.read(data, { type: 'binary' });
 
-        console.log(workBook.SheetNames)
+        //console.log(workBook.SheetNames)
 
         for (var i = 0; i < workBook.SheetNames.length; i++) {
             if (i != 0)
@@ -110,7 +116,10 @@ function readExcel() {
             onClickInit(false)
             var rows = XLSX.utils.sheet_to_json(workBook.Sheets[workBook.SheetNames[i]]);
             xlsxData = JSON.parse(JSON.stringify(rows));
-            orginMABCXlsx = input.files[0];
+            
+			//console.log(xlsxData, "readExcel xlsxData");
+
+			orginMABCXlsx = input.files[0];
             parsingData(xlsxData);
 
         }
@@ -145,25 +154,51 @@ function parsingDataMaker(xlsxData) {
         var currentCategory = xlsxData[i][keyTitle];
         curLoadedData[xlsxData[i][keyPivotTitle]] = xlsxData[i];
 
+		//console.log(curLoadedData[xlsxData[i][keyPivotTitle]], "curLoadedData[xlsxData[i][keyPivotTitle]]");
+
         if (currentCategory) {
             bigParseData[currentCategory] = bigParseData[currentCategory] ? bigParseData[currentCategory] : [];
             bigParseData[currentCategory].push(xlsxData[i]);
         }
     }
+	
+
+	console.log(bigParseData, "bigParseData");
+
     for (var key in bigParseData) {
         for (var i = 0; i < bigParseData[key].length; i++) {
             var currentData = bigParseData[key][i];
             var excelTitle_1 = getExcelTitleFromData(currentData, "분자표지명");
-            var excelTitle_3 = getExcelTitleFromData(currentData, "위치.bp.");
+            
+			//염색체명이 필요함
+			var excelTitle_2 = getExcelTitleFromData(currentData, "염색체");
 
-            parseData[currentData[excelTitle_1]] = currentData[excelTitle_3];
+			//var excelTitle_3 = getExcelTitleFromData(currentData, "위치.bp.");
+			var excelTitle_3 = getExcelTitleFromData(currentData, "실제위치(bp)");
+
+			//console.log(currentData, "currentData");
+			//console.log(excelTitle_1, "excelTitle_1");
+			//console.log(excelTitle_2, "excelTitle_2");
+			//console.log(excelTitle_3, "excelTitle_3");
+
+            //parseData[currentData[excelTitle_1]] = currentData[excelTitle_3];
+
+			parseData[currentData[excelTitle_1]] = { "염색체명" :  currentData[excelTitle_2] , "실제위치(bp)" : currentData[excelTitle_3] };
+			
         }
     }
+
+
+	//console.log(parseData, "parseData");
+	
 }
 
 
 // # . 2 data 원하는 형태로 변환
 function parsingData(xlsxData, isRun) {
+
+	console.log(JSON.parse(JSON.stringify(xlsxData)), "xlsxData(deep copy)");
+	
 
     var checkMap = {};
 
@@ -172,8 +207,11 @@ function parsingData(xlsxData, isRun) {
 
             var keyArr = Object.keys(xlsxData[i]);
 
+			
 
             for (var key in xlsxData[i]) {
+
+				//console.log(Object.keys(xlsxData[i]), "xlsxData keys");
 
                 if (key.includes("염색체명") || key.includes("위치(bp)") || key.includes("분자표지명") || key.includes("모본") || key.includes("부본"))
                     continue;
@@ -184,11 +222,18 @@ function parsingData(xlsxData, isRun) {
                     var _pos = Number(xlsxData[i][keyArr[1]]);
                     //if(xlsxData[i][keyArr[1]].length == 1){continue;}
 
-                    if (curLoadedData[xlsxData[i]["분자표지명"]] && curLoadedData[xlsxData[i]["분자표지명"]]["염색체"]) {
+
+                    //if (curLoadedData[xlsxData[i]["분자표지명"]] && curLoadedData[xlsxData[i]["분자표지명"]]["염색체"]) {
+
+					if (curLoadedData[xlsxData[i]["분자표지명"]] && curLoadedData[xlsxData[i]["분자표지명"]]["염색체"] && !xlsxData[i]["위치(bp)"]) {
+
 
                         let posPivotTitle = getExcelTitleFromData(curLoadedData[xlsxData[i]["분자표지명"]], "실제");
                         let geneTitle = getExcelTitleFromData(curLoadedData[xlsxData[i]["분자표지명"]], "염색체");
 
+						if(xlsxData[i]["위치(bp)"] == 60000000) {
+							console.log(xlsxData[i]["염색체명"],"존재");
+						}
 
                         // keyArr[2] = "분자표지명";
                         try {
@@ -196,25 +241,36 @@ function parsingData(xlsxData, isRun) {
                             // xlsxData[i][keyArr[0]] = curLoadedData[xlsxData[i]["분자표지명"]][geneTitle];
                             // xlsxData[i][keyArr[2]] = curLoadedData[xlsxData[i]["분자표지명"]][mabTitle];
 
-                        }
+
+						}
                         catch (e) {
                             console.log(e);
                         }
 
+						
 
                         _pos = curLoadedData[xlsxData[i]["분자표지명"]][posPivotTitle];
+
+						
+
 
                     }
                     else {
 
                         _pos = xlsxData[i][getExcelTitleFromData(xlsxData[i], "위치")];
-                        /*
-                        if(parseData[xlsxData[i][getExcelTitleFromData( xlsxData[i], "위치")]]){
-                            _pos = parseData[xlsxData[i][getExcelTitleFromData( xlsxData[i], "위치")]];
-                        }
-                        else if(xlsxData[i][getExcelTitleFromData( xlsxData[i], "위치")])
-                            _pos = 0;*/
+                        
+                        //if(parseData[xlsxData[i][getExcelTitleFromData( xlsxData[i], "위치")]]){
+                        //    _pos = parseData[xlsxData[i][getExcelTitleFromData( xlsxData[i], "위치")]];
+                        //}
+                        //else if(xlsxData[i][getExcelTitleFromData( xlsxData[i], "위치")])
+                        //    _pos = 0;*/
                     }
+
+				
+
+				//console.log(curLoadedData, "curLoadedData");
+
+				
 
                 if (key.includes("염색체명") || key.includes("위치(bp)") || key.includes("분자표지명") || key.includes("모본") || key.includes("부본"))
                         continue;
@@ -235,48 +291,55 @@ function parsingData(xlsxData, isRun) {
                     //if(currentIndex < 5){continue;}
                     // if(key == "f" || key == "m" || key == "id" || key == "pos" || key == " "){continue;}
 
-
                     chartDataArr[key] = chartDataArr[key] ? chartDataArr[key] : [];
-                    chrPercent[key] = {};
+					chartDataArr2[key] = chartDataArr2[key] ? chartDataArr2[key] : [];
+                    
+					chrPercent[key] = {};
+					chrPercent2[key] = {};
                     var type = "";
 
                     if (xlsxData[i][key] == xlsxData[i]["모본"]) {
                         type = "B";
-                        chrTotalCount[key + "_" + gene] = chrTotalCount[key + "_" + gene] ? chrTotalCount[key + "_" + gene] + 2 : 2;
+                        chrTotalCount[key + "_" + gene] = chrTotalCount[key + "_" + gene] >=0 ? chrTotalCount[key + "_" + gene] + 2 : 2;
                     } else if (xlsxData[i][key] == xlsxData[i]["부본"]) {
                         type = "A";
-                        chrTotalCount[key + "_" + gene] = chrTotalCount[key + "_" + gene] ? chrTotalCount[key + "_" + gene] : 0;
+                        chrTotalCount[key + "_" + gene] = chrTotalCount[key + "_" + gene]  >=0? chrTotalCount[key + "_" + gene] : 0;
                     } else if (xlsxData[i][key] == "H") {
                         type = "H";
-                        chrTotalCount[key + "_" + gene] = chrTotalCount[key + "_" + gene] ? chrTotalCount[key + "_" + gene] + 1 : 1;
+                        chrTotalCount[key + "_" + gene] = chrTotalCount[key + "_" + gene]  >=0? chrTotalCount[key + "_" + gene] + 1 : 1;
                     } else {
                         type = "-";
-                        chrTotalCount[key + "_" + gene] = chrTotalCount[key + "_" + gene] ? chrTotalCount[key + "_" + gene] : 0;
+                        chrTotalCount[key + "_" + gene] = chrTotalCount[key + "_" + gene]  >=0? chrTotalCount[key + "_" + gene] : 0;
                     }
 
-                    chrTotalAllCount[key + "_" + gene] = chrTotalAllCount[key + "_" + gene] ? chrTotalAllCount[key + "_" + gene] + 1 : 1;
+                    chrTotalAllCount[key + "_" + gene] = chrTotalAllCount[key + "_" + gene]  >=0? chrTotalAllCount[key + "_" + gene] + 1 : 1;
 
-
-
-
-                    chartDataArr[key].push({
+					//console.log(" key " + key);
+					
+					
+					
+                   chartDataArr[key].push({
                         // type : xlsxData[i][key],
                         type: type,
                         pos: _pos,
-                        chr: xlsxData[i][getExcelTitleFromData(xlsxData[i], "염색체")],
+                        //chr: xlsxData[i][getExcelTitleFromData(xlsxData[i], "염색체명")],
+						chr: xlsxData[i][getExcelTitleFromData(xlsxData[i], "염색체")],
                         name: xlsxData[i][getExcelTitleFromData(xlsxData[i], "분자표지명")]
-                        // pos : xlsxData[i]["pos"],
+                        //pos : xlsxData[i]["pos"],
                         // chr : xlsxData[i]["id"],
                         // name: xlsxData[i][" "]
                     });
+					
+					//console.log(chartDataArr[key], "chartDataArr[key]");
+
 
                 } catch {
                     console.error(i + "_index mabc parse Error")
                 }
             }
 
-
             if (curLoadedData[xlsxData[i]["분자표지명"]] && curLoadedData[xlsxData[i]["분자표지명"]]["염색체"]) {
+
 
                 xlsxData[i][keyArr[0]] = curLoadedData[xlsxData[i]["분자표지명"]][keyArr[0]];
                 xlsxData[i][keyArr[2]] = curLoadedData[xlsxData[i]["분자표지명"]][keyArr[2]];
@@ -291,6 +354,11 @@ function parsingData(xlsxData, isRun) {
             }
         }
 
+		console.log(xlsxData, "xlsxData");
+		console.log(curLoadedData, "curLoadedData");
+		//console.log(keyArr, "keyArr");
+		
+		
 
         var chrSelectBox = document.querySelector(".chrSelectBox");
         chrSelectBox.innerHTML = "<option disabled selected>회복율정렬 선택</option><option>정렬 해제</option>"
@@ -299,6 +367,8 @@ function parsingData(xlsxData, isRun) {
             console.error("lengthDataOrgin is empty");
             return;
         }
+
+
 
         for (var k in lengthDataOrgin) {
 
@@ -310,6 +380,7 @@ function parsingData(xlsxData, isRun) {
                 for (var i = 0; i < chartDataArr[key].length; i++) {
                     if (chartDataArr[key][i].chr == lengthDataOrgin[k].id) {
                         isIn = true;
+						chrPercent2[key][lengthDataOrgin[k].id] = 100;
                         break;
                     }
                 }
@@ -317,11 +388,61 @@ function parsingData(xlsxData, isRun) {
                 if (isIn == false) {
                     chrTotalData[lengthDataOrgin[k].id] = Number(lengthDataOrgin[k].pos);
                     chartDataArr[key].push({ type: 'B', pos: lengthDataOrgin[k].pos, chr: lengthDataOrgin[k].id, name: '' });
-                    chrPercent[key][lengthDataOrgin[k].id] = 100;
+                    chrPercent2[key][lengthDataOrgin[k].id] = 100;
                 }
 
             }
         }
+		
+		// 전부 100
+		//console.log("chrPercent2 : ", JSON.parse(JSON.stringify(chrPercent2)));
+
+		// chartDataArr2에도 똑같은 로직 적용(레퍼런스만 들어감)
+		for (var k in lengthDataOrgin) {
+
+            if (lengthDataOrgin[k].id == "name")
+                continue;
+            for (var key in chartDataArr2) {
+
+                let isIn = false;
+                for (var i = 0; i < chartDataArr2[key].length; i++) {
+                    if (chartDataArr2[key][i].chr == lengthDataOrgin[k].id) {
+                        isIn = true;
+                        break;
+                    }
+                }
+
+                if (isIn == false) {
+                    chrTotalData[lengthDataOrgin[k].id] = Number(lengthDataOrgin[k].pos);
+                    chartDataArr2[key].push({ type: 'B', pos: lengthDataOrgin[k].pos, chr: lengthDataOrgin[k].id, name: '' });
+					chrPercent[key][lengthDataOrgin[k].id] = 100;
+                }
+
+            }
+		}
+
+		// chartDataArr --- chr 기준 오름차순 정렬
+		for (var key in chartDataArr) {
+			function compare_lname(a,b) {
+				if ( a.chr < b.chr){
+				return -1;
+				}
+				if ( a.chr > b.chr){
+				return 1;
+				}
+				return 0;
+			}
+			chartDataArr[key].sort(compare_lname);
+			//
+		}
+
+		//console.log("chrPercent : ", JSON.stringify(chrPercent));
+		
+		console.log("=====");
+		console.log("chartDataArr : ", chartDataArr);
+		//console.log(" chartDataArr2 : ", chartDataArr2);
+		//console.log("lengthDataOrgin : ", lengthDataOrgin);
+		
 
         try {
             var newLengthData = {};
@@ -355,10 +476,9 @@ function parsingData(xlsxData, isRun) {
         lengthData = newLengthData;
 
 
-        console.log(lengthData);
-        console.log(lengthDataOrgin);
-        console.log(chrTotalData);
-
+        //console.log(lengthData, "lengthData");
+        //console.log(lengthDataOrgin);
+        //console.log(chrTotalData);
 
         if (Object.keys(chartDataArr).length == 0) {
             //alert("잘못된 MABC파일입니다.");
@@ -366,7 +486,7 @@ function parsingData(xlsxData, isRun) {
             return;
         }
 
-        console.log(newLengthData);
+        //console.log(newLengthData);
 
         if (Object.keys(newLengthData).length == 0) {
             var errorChr = Object.keys(chrTotalData)[0].replace(/[0-9]/g, "");
@@ -594,11 +714,50 @@ function buildGraph() {
         }
     }
 
+	document.querySelector(".chrSelectBox").innerHTML = "<option disabled selected>회복율정렬 선택</option><option>정렬 해제</option>"
+
+	var keyCount = 0;
+
+	console.log(chrPercent, "chrPercent");
+
     // 새로운 퍼센트 20220303
     for (var key in chrPercent) {
+
+		
+
         for (var keySmall in chrPercent[key]) {
+
+			/*
+					console.log(" key : " + key);
+					console.log(" keySmall : " + keySmall);					
+					console.log(" chrTotalCount : " + chrTotalCount[key + "_" + keySmall]);
+					console.log(" chrTotalAllCount : " + chrTotalAllCount[key + "_" + keySmall]);
+					console.log(" result " + chrPercent[key][keySmall]);
+			*/
+
+			/* chartDataArr[key].push({
+                        // type : xlsxData[i][key],
+                        type: type,
+                        pos: _pos,
+                        chr: xlsxData[i][getExcelTitleFromData(xlsxData[i], "염색체명")],
+                        name: xlsxData[i][getExcelTitleFromData(xlsxData[i], "분자표지명")]
+                        // pos : xlsxData[i]["pos"],
+                        // chr : xlsxData[i]["id"],
+                        // name: xlsxData[i][" "]
+			});*/
+
+			if(keyCount == 0) {
+				var chrSelectBox = document.querySelector(".chrSelectBox");
+				var chrSelectOption = document.createElement("option");
+				chrSelectOption.innerText = keySmall;
+				chrSelectOption.classList.add("chrOption");
+                chrSelectBox.appendChild(chrSelectOption);
+				
+			}
+
             chrPercent[key][keySmall] = (chrTotalCount[key + "_" + keySmall] / (2 * chrTotalAllCount[key + "_" + keySmall])) * 100;
         }
+		keyCount++;
     }
 
     // 토탈식
@@ -607,12 +766,20 @@ function buildGraph() {
         var totalA = parseFloat("0");
 
         for (var keySmall in chrPercent[key]) {
-            chrPercent[key][keySmall] = chrPercent[key][keySmall] ? chrPercent[key][keySmall] : 100;
+
+			//console.log(" for result " + chrPercent[key][keySmall]);
+
+            chrPercent[key][keySmall] = chrPercent[key][keySmall] >= 0 ? chrPercent[key][keySmall] : 100;
+
+			//console.log(" for result1 " + chrPercent[key][keySmall]);
+
+			//console.log("chrPercent[key][keySmall] : " + chrPercent[key][keySmall]);
             totalA += chrPercent[key][keySmall];
         }
 
         chrPercent[key]["total"] = totalA / chrTotalLength;
     }
+
 
     // var newChrPercent = chrPercent; 
     // for(var key in chrPercent){
@@ -721,7 +888,7 @@ function addGraphEvent() {
             clickEl.style.pointerEvents = "all";
 
             clickEl.parentNode.replaceChild(clickEl, currentShadow);
-            console.log()
+            //console.log()
             sortGraphData();
         });
 
@@ -755,6 +922,8 @@ function addGraphEvent() {
             }
         });
     }
+
+	
 }
 
 // 그래프 정렬
@@ -768,14 +937,23 @@ function sortGraphData() {
     var newChrObj = {};
 
     for (var i = 0; i < newChrArr.length; i++) {
+        newChrObj[newChrArr[i]] = chartDataArr2[newChrArr[i]];
+    }
+    chartDataArr2 = newChrObj;
+
+
+
+	//그래프 정렬하고 상태저장해도 다음에 불러올대 적용이 안되어서 추가한 코드
+	var newChrObj = {};
+    for (var i = 0; i < newChrArr.length; i++) {
         newChrObj[newChrArr[i]] = chartDataArr[newChrArr[i]];
     }
     chartDataArr = newChrObj;
+
+
+
     buildTable();
 }
-
-
-
 
 // ------------------------------------------------------
 //                         테이블
@@ -792,6 +970,7 @@ function buildTable() {
     newTable.classList.add("table");
 
 
+
     // 머리
     var thead = document.createElement('thead');
     var theadTr = document.createElement('tr');
@@ -801,11 +980,8 @@ function buildTable() {
     theadThTotla.innerText = "Total";
     theadTr.appendChild(theadThTotla);
 
-
-
-
     // for(var key in chrTotalData){
-    for (var key in lengthDataOrgin) {
+    for (var key in lengthDataOrgin) {	
 
         if (lengthDataOrgin[key].id == "name")
             continue;
@@ -819,8 +995,23 @@ function buildTable() {
 
     // 몸통
     var tbody = document.createElement('tbody');
-    for (var key in chartDataArr) {
+    for (var key in chartDataArr2) {
 
+		//console.log("key : ", key);
+/*
+		//염색체 순서 정렬(오름차순)
+		function compare_lname(a,b) {
+			if ( a.chr < b.chr){
+			return -1;
+			}
+			if ( a.chr > b.chr){
+			return 1;
+			}
+			return 0;
+		}
+		chrPercent[key].sort(compare_lname);
+		//
+*/
         //alert(key);
         var tbodyTr = document.createElement('tr');
         var tbodyTdName = document.createElement('td');
@@ -832,7 +1023,7 @@ function buildTable() {
         for (var keySmall in chrPercent[key]) {
             var tbodyTd = document.createElement('td');
 
-            var percentText = Number(chrPercent[key][keySmall] ? chrPercent[key][keySmall] : 100).toFixed(2);
+            var percentText = Number(chrPercent[key][keySmall] >=0 ? chrPercent[key][keySmall] : 100).toFixed(2);
             if (Math.ceil(percentText) == percentText) {
                 percentText = Math.ceil(percentText);
             }
@@ -850,6 +1041,10 @@ function buildTable() {
             tbodyTr.appendChild(tbodyTd);
         }
     }
+
+	//console.log("chartDataArr2 (json) : ", JSON.stringify(chartDataArr2));
+	//console.log("chrPercent (json) : ", JSON.stringify(chrPercent));
+	//console.log("tbody : ", tbody);
 
     newTable.appendChild(thead);
     newTable.appendChild(tbody);
@@ -872,9 +1067,17 @@ function sortTableData() {
     }
     var newChrObj = {};
     for (var i = 0; i < newChrArr.length; i++) {
+        newChrObj[newChrArr[i]] = chartDataArr2[newChrArr[i]];
+    }
+    chartDataArr2 = newChrObj;
+
+	//테이블이 안 움직여서 추가한 코드
+	var newChrObj = {};
+    for (var i = 0; i < newChrArr.length; i++) {
         newChrObj[newChrArr[i]] = chartDataArr[newChrArr[i]];
     }
     chartDataArr = newChrObj;
+
 
     buildGraph();
 }
@@ -1166,14 +1369,29 @@ function initAnimation() {
 var cnt=0;
 function drawModalGraph(_graphName) {
 
-
     // 데이터 변환 작업
     var graphName = chartDataArr[_graphName];
+	var graphName2 = chartDataArr2[_graphName];
     var modalGraph_scale = document.querySelector(".modalGraph_scale");
     modalGraph_scale.innerHTML = "";
     let modalGraphData = {};
 
 
+	//염색체 순서 정렬(오름차순)
+	function compare_lname(a,b) {
+		if ( a.chr < b.chr){
+		return -1;
+		}
+		if ( a.chr > b.chr){
+		return 1;
+		}
+		return 0;
+	}
+	chartDataArr[_graphName].sort(compare_lname);
+
+	//console.log(JSON.stringify(chartDataArr));
+
+	
     for (var i = 0; i < graphName.length; i++) {
         modalGraphData[graphName[i].chr] = modalGraphData[graphName[i].chr] ? modalGraphData[graphName[i].chr] : [];
         modalGraphData[graphName[i].chr].push({
@@ -1183,10 +1401,29 @@ function drawModalGraph(_graphName) {
             chr: graphName[i].chr
         })
     }
+	
 
+	/*
+	for (var i = 0; i < graphName2.length; i++) {
+        modalGraphData[graphName2[i].chr] = modalGraphData[graphName2[i].chr] ? modalGraphData[graphName2[i].chr] : [];
+        modalGraphData[graphName2[i].chr].push({
+            pos: graphName2[i].pos,
+            name: graphName2[i].name,
+            type: graphName2[i].type,
+            chr: graphName2[i].chr
+        })
+    }
+	*/
+
+	//console.log("modalGraphData : ", modalGraphData);
+
+	/*
     for (var key in lengthData) {
         lengthData[key] = 0;
     }
+	*/
+	//console.log("lengthData : ", lengthData);
+	
 
     for (let key in modalGraphData) {
         modalGraphData[key].sort(function (a, b) { return a.pos - b.pos; });
@@ -1202,6 +1439,12 @@ function drawModalGraph(_graphName) {
             bigLength = lengthData[key];
         }
     }
+
+	//console.log(JSON.stringify(modalGraphData));
+
+
+	
+
 
     // 그래프 그리기 
     for (var key in modalGraphData) {
@@ -1227,8 +1470,6 @@ function drawModalGraph(_graphName) {
 
         for (var i = 0; i < modalGraphData[key].length; i++) {
 
-
-
             // 스택
             var modalGraphStack = document.createElement('div');
             modalGraphStack.classList.add("modalGraphElStack");
@@ -1239,6 +1480,9 @@ function drawModalGraph(_graphName) {
             modalStackDesc.classList.add("modalStackDesc");
             modalStackDesc.setAttribute("data-column", key + "_modalDesc");
             modalStackDesc.innerHTML = "".padStart(modalGraphData[key][i]["name"].length, "A");
+
+
+			//console.log("modalStackDesc : " , modalStackDesc);
 
             // 스택 이름
             var modalStackDescLine = document.createElement('div');
@@ -1299,12 +1543,10 @@ function drawModalGraph(_graphName) {
 
 
 
-
-
         for (var i = 0; i < stackDescEls.length; i++) {
 
 
-            console.log(modalGraphData[key][i]["name"]);
+            //console.log(modalGraphData[key][i]["name"]);
             if (modalGraphData[key][i]["name"].length == 0) {
                 stackDescLineEls[i].style.display = "none";
                 continue;
@@ -1315,6 +1557,7 @@ function drawModalGraph(_graphName) {
             // stackDescEls[i].style.top = stacEls[i].offsetTop + (stacEls[i].clientHeight/2) + "px";
             stackDescEls[i].style.top = (stacEls[i].offsetTop) + "px";
             stackDescLineEls[i].style.top = stacEls[i].offsetTop + "px"
+
 
 
             // 높이값 조정
@@ -1420,6 +1663,7 @@ function onChangeChrSort() {
     }
 
     chartDataArr = newChartDataArr;
+	chartDataArr2 = newChartDataArr;
     var allChrBtn = document.querySelector(".allchr");
     if (allChrBtn.classList.contains("active")) {
         onClickAllChr(false);
@@ -1469,6 +1713,7 @@ function onClickAllChr(isClick) {
     }
 
     chartDataArr = newChartDataArr;
+	chartDataArr2 = newChartDataArr;
     buildGraph();
 }
 
@@ -1535,7 +1780,7 @@ function onClickRun() {
         memo.style.display = "flex";
     }
 
-    console.log(Object.keys(xlsxData));
+    //console.log(Object.keys(xlsxData));
 
     buildGraph();
 }
@@ -1565,6 +1810,8 @@ function onChangeVersion() {
 function readLenFile() {
     var file = document.getElementsByClassName("lenPos")[0].innerHTML;
 
+	//console.log(file, "var file");
+
     if (!file) { console.error("readLenFile"); return };
     var rawFile = new XMLHttpRequest();
     rawFile.open("GET", file, true);
@@ -1577,6 +1824,7 @@ function readLenFile() {
             }
             if (rawFile.status === 200 || rawFile.status == 0) {
                 var allText = rawFile.responseText;
+				//console.log(allText, "var allText");
                 parseLenData(allText);
                 readMakerFile();
 
@@ -1597,6 +1845,13 @@ function readLenFile() {
 }
 
 function readMakerFile(files) {
+
+	//console.log(files, "files if? else?")
+	// 현재 코드구조상 readMakerFile이 2번 호출된다.
+	// 첫번째는 레퍼런스 경로 정보를 가지고있는 배열 result
+	// 두번째는 result==files가 없는 상태로 호출.. 인데 그걸로 뭘 하는지를 모르겠다. 
+	// 애초에 else 구문에서 정상처리가 안된채로 에러가 남. "serverFile"이라는 클래스명도 html 내에 존재하지 않음
+
     var _url = "";
     if (files) {
         files.map(item => {
@@ -1606,7 +1861,11 @@ function readMakerFile(files) {
         })
     } else {
         // var serverFile = document.getElementsByClassName("serverFile")[0].innerHTML;
-        _url = document.getElementsByClassName("serverFile")[0].innerHTML;
+		
+		_url = document.getElementsByClassName("serverFile")[0].innerHTML;
+		//_url = document.getElementById("marker_file")[0].innerText;
+		
+
     }
 
     if (!_url) { console.error("serverMaker Empty"); return };
@@ -1615,8 +1874,12 @@ function readMakerFile(files) {
         url: 'webisfree.com'
     };
 
+	//console.log(_jsonData, "코드가 여기까지 온다");
+
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
+
+		//console.log(this.status, "xhr status")
 
         if (this.status == 404) {
             alert("마커 세트를 찾을 수 없습니다.")
@@ -1624,6 +1887,8 @@ function readMakerFile(files) {
 
         if (this.readyState == 4 && this.status == 200) {
             var _data = this.response;
+
+			//console.log(_data, "결과 데이터. 서버경로의 엑셀파일(약 40kB)을 불러온다")
 
             let file = new File([_data], "result.xlsx", { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
 
@@ -1634,6 +1899,7 @@ function readMakerFile(files) {
                 workBook.SheetNames.forEach(function (sheetName) {
                     var rows = XLSX.utils.sheet_to_json(workBook.Sheets[sheetName]);
                     var xlsxData = JSON.parse(JSON.stringify(rows));
+					//console.log(xlsxData, "분자표지명 레퍼런스");
                     adminXlsxData = xlsxData;
                     parsingDataMaker(xlsxData);
                 })
@@ -1661,10 +1927,12 @@ function loadSaveDate() {
             dataType: 'json',
             data: data,
             success: function (result) {
+				
                 if (result) {
                     var serverData = result;
 
                     chartDataArr = serverData.chartDataArr;
+					chartDataArr2 = serverData.chartDataArr;
                     chrTotalData = serverData.chrTotalData;
                     chrTotalIndex = serverData.chrTotalIndex;
                     chrPercent = serverData.chrPercent;
@@ -1673,6 +1941,9 @@ function loadSaveDate() {
                     lengthData = serverData.lengthData;
                     lengthDataOrgin = serverData.lengthDataOrgin;
                     sortType = serverData.sortType;
+
+					//회복율정렬 선택
+
                     setTimeout(buildGraph(), 10)
                 }
 
@@ -1689,6 +1960,8 @@ function InsertOutcome() {
     var outcome_id = $("#outcome_id").val();
 
     var data = { "outcome_id": outcome_id, "outcome_result": JSON.stringify({ chartDataArr, chrTotalData, chrTotalIndex, chrPercent, lengthData, lengthDataOrgin, chrTotalCount, chrTotalAllCount, sortType: sortType }) };
+
+	console.log(chartDataArr);
 
     $.ajax(
         {

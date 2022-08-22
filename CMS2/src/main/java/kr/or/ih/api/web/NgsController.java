@@ -158,6 +158,10 @@ public class NgsController
 		if (!filePath.exists())
 			filePath.mkdirs();
 		
+		if(fasta_file[0].isEmpty()) {
+			System.out.println("empty!");
+		}
+		
 		String marker_file = service.SelectMarkerFileName(marker_id);
 		
 		try
@@ -179,6 +183,7 @@ public class NgsController
         {
         	System.out.println("error");
         }
+        
 		
 		return "common/web/mabanalysis/resultfiles/" + date_name + "/" + date_name;
 	}

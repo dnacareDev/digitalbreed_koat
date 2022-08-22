@@ -365,9 +365,11 @@ function parsingUserData(xlsxData){
     for(var i = 0 ; i < adminXlsxData.length; i++){
         let curPivotTitle = getExcelTitleFromData(adminXlsxData[i],"분자표지명"); 
         adminMap[adminXlsxData[i][curPivotTitle]] = adminXlsxData[i]; 
-        console.log("adminXlsxData[i] : " + adminXlsxData[i] );
+        
     }
-
+	
+	//console.log("adminXlsxData : ", adminXlsxData );
+	console.log("adminMap : ", adminMap);
 	
 	//alert("xlsxData[0][excelTitle] : " + xlsxData[0][excelTitle]);
 
@@ -418,15 +420,16 @@ function parsingUserData(xlsxData){
         }
     }
 
+
+
     if(Object.keys(bigParseData).length==0){
         console.error("bigParseData {}");
         alert("잘못된 사용자 분자표지 세트입니다.");
         return;
     }
-    
 
-    //console.log("bigParser");
-    //console.log(bigParseData);
+	console.log("bigParseData : ", bigParseData);
+
 
     for(var key in bigParseData){
         for(var i = 0 ; i < bigParseData[key].length ; i++){
@@ -450,6 +453,38 @@ function parsingUserData(xlsxData){
             }           
         }
     }
+
+	//console.log("parseData : ", parseData);
+	//console.log("parseData : ", JSON.stringify(parseData));
+
+
+
+	// 서버엑셀파일, 인풋엑셀파일을 pos기준 정렬 정렬이 가능하도록 설정
+	let orderedData = {};
+	for(key in parseData) {
+		//console.log(key);
+		
+		function sort(obj, valSelector) {
+			const sortedEntries = Object.entries(obj)
+				.sort((a, b) =>
+					valSelector(a[1]) > valSelector(b[1]) ? 1 :
+					valSelector(a[1]) < valSelector(b[1]) ? -1 : 0);
+			return new Map(sortedEntries);
+		}
+
+		let sortedMap = sort(parseData[key], val => val.adminPos); 
+		let sortedObj = {}; 
+		sortedMap.forEach((v,k) => { sortedObj[k] = v });
+
+		orderedData[key] = sortedObj;
+	}
+	//console.log("orderedData : ", orderedData);
+
+	
+	
+	//정렬한 객체를 parseData에 대입
+	parseData = orderedData;
+
 
     initChart();
     initTable();
@@ -575,6 +610,8 @@ function drawChart(){
         }
 
         divEl.parentElement.style.marginRight = (highMarginR + 80) + "px";
+
+		
 
         var stackName = document.querySelectorAll("[data-stackname='" +_key.replaceAll(".", "_DOT_")+ "_stackName']"); 
         var stackLine = document.querySelectorAll("[data-stackline='" +_key.replaceAll(".", "_DOT_")+ "_stackLine']"); 

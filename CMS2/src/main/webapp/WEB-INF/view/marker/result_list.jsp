@@ -22,6 +22,7 @@
     <link rel="stylesheet" href="/digit/tui/tui-date-picker/dist/tui-date-picker.css">
     <link rel="stylesheet" href="/digit/tui/tui-time-picker/dist/tui-time-picker.css">
     <script src="/digit/vendor/jquery-3.6.0.js"></script>
+    <script src="/digit/vendor/makeXlsx.js"></script>
     <script src="/digit/js/Register_result_data/common.js"></script>
     <script src="/digit/js/nav.js"></script>
     <script src="/digit/js/alarm.js"></script>
@@ -29,8 +30,33 @@
     <script src="/digit/tui/tui-date-picker/dist/tui-date-picker.js"></script>
     <script src="/digit/tui/tui-time-picker/dist/tui-time-picker.js"></script>
     <script src="/digit/tui/tui-grid/dist/tui-grid.js"></script>
+    
+    
+
     <style>
     	#wrap #main {height: 100%;}
+    	
+    	.file_btn2 {
+		    line-height: 37px;
+		    width: 88px;
+		    background-color: #397FF4;
+		    display: inline-block;
+		    text-align: center;
+		    color: #fff;
+		    font-weight: bold;
+		    border-radius: 4px;
+		    -webkit-border-radius: 4px;
+		    margin-top: 28px;
+		    margin-left: 5px;
+    	}
+    	
+    	.file_title2 { width: 100%; }
+    	
+    	/* right_box에 있는걸 가져옴. left_box 위치에 옮기고 같은 효과를 보면 된다
+    	.input_box > p:not(:last-child) {font-size: 13px; float: right;}
+		*/
+
+    	
     </style>
 </head>
 <body>
@@ -178,6 +204,7 @@
             </section>
         </main>
     </div>
+    
     <div class="dimm">
         <div class="new_win_box new_result_box">
            <!--  <button class="win_close">닫기</button> -->
@@ -193,6 +220,7 @@
                                 </c:forEach>
                             </select>
                         </div>
+                        
                         <div class="new_data_box">
                             <label for="analysis_type" class="select_arrow">분석 종류</label>
                             <select id="analysis_type" name="outcome_type">
@@ -208,9 +236,17 @@
                                 <option value="8">SNP 분석 | SNP analysis</option>
                             </select>
                         </div>
+                        
+                        <!-- 2022-08-12 | 엑셀파일 첨부하여 dataList 동적변환 -->
                         <div class="new_data_box">
-                            <label for="user_username">고객 E-mail</label>
-                            <input type="email" id="user_username" name="user_username">
+                            <label for="user_username">
+                            	고객 E-mail
+                            	<a download href="upload/sampleFile/client_list.xlsx" style="color:blue;">&nbsp;(목록 다운로드)</a>
+                            	<label for="datalist_file" style="color:blue; display:block; float:right; cursor:pointer">&nbsp;(목록 변경)</label>
+                            	<input type="file" class="file_in" id="datalist_file" name="file2" onchange="Excel_to_DataList(event)" style="display:none;">
+                            </label>
+                            <input autocomplete="off" role="combobox" type="email" id="user_username" name="user_username" list="list">
+                            <datalist id="list"></datalist>
                         </div>
                     </div>
                     <div class="data_right_box data_box">
@@ -227,6 +263,7 @@
                             </div>
                             <label for="result_file" class="file_btn">파일첨부</label>
                         </div>
+                        
          				<div class="new_data_box">
          					<label for="outcome_status">공개여부</label>
          					<select id="outcome_status" name="outcome_status">
@@ -238,7 +275,7 @@
                     <div class="data_bottom_box data_box">
                      <div class="new_data_box">
                        <label for="outcome_comment"> </label>  
-                       <textarea id="outcome_comment" name="outcome_comment">의뢰하신 분석 결과 데이터가 등록 되었습니다. 시스템에서 확인 부탁드립니다.&#10;http://www.koat.or.kr/digit/</textarea>
+                       <textarea id="outcome_comment" name="outcome_comment">안녕하세요. 의뢰하신 분석 결과 데이터가 등록 되었습니다.&#10;https://seedcenter.koat.or.kr/digit/ 에서 분석 결과를 확인 해 주시기 바랍니다.</textarea>
                      </div>
                     </div>
                 </div>
@@ -275,9 +312,16 @@
                                 <option value="8">SNP 분석 | SNP analysis</option>
                             </select>
                         </div>
+                        <!-- 2022-08-12 | 엑셀파일 첨부하여 dataList 동적변환 -->
                         <div class="new_data_box">
-                            <label for="client_email">고객 E-mail</label>
-                            <input type="email" id="modify_username" name="user_username">
+                            <label for="modify_username">
+                            	고객 E-mail
+                            	<a download href="upload/sampleFile/client_list.xlsx" style="color:blue;">&nbsp;(목록 다운로드)</a>
+                            	<label for="datalist_file2" style="color:blue; display:block; float:right; cursor:pointer">&nbsp;(목록 변경)</label>
+                            	<input type="file" class="file_in" id="datalist_file2"  name="file2" onchange="Excel_to_DataList(event)" style="display:none;">
+                            </label>
+                            <input autocomplete="off" role="combobox" type="email" id="modify_username" name="user_username" list="list">
+                            <datalist id="list"></datalist>
                         </div>
                     </div>
                     <div class="data_right_box data_box">
@@ -334,6 +378,8 @@
 	$(document).ready(function()
 	{
 		SelectMarkerVersion("고추");
+		
+		Read_DataList();
 	});
 	
 	$("#crop_selection").change(function()
@@ -342,6 +388,53 @@
 		
 		SelectMarkerVersion(marker_crop);
 	});
+	
+	function Read_DataList() {
+		
+		$.ajax({
+					url : "parsingExcel",
+					method : "POST",
+					success : function(result) {
+						console.log("client_list result : ", result);
+						
+						// 첫줄은 제외해야 하므로 i=1
+						for(let i=1 ; i<result.length ; i++) {
+							$('#list').append('<option value="' + result[i][2] + '">' + result[i][0] + '(' + result[i][1] + ')' + '</option>')
+						}
+					}
+		});
+	}
+	
+	
+	
+	function Excel_to_DataList(event) {
+		
+		const input = event.target;
+		console.log(input);
+		const reader = new FileReader();
+	    reader.onload = function(){
+	    	const fdata = reader.result;
+	    	const read_buffer = XLSX.read(fdata, {type : 'binary'});
+	        
+	        read_buffer.SheetNames.forEach(function(sheetName){
+	        	const rowdata =XLSX.utils.sheet_to_json(read_buffer.Sheets[sheetName]);
+	            //console.log(JSON.stringify(rowdata));
+	            console.log(rowdata);
+	            
+	            $('#list').empty();
+	            for(let i=0 ; i<rowdata.length ; i++) {
+	            	$('#list').append('<option value="' + rowdata[i]['E-Mail'] + '">' + rowdata[i]['기업명']  + '(' + rowdata[i]['담당자(책임담당자)'] + ')'  + '</option>')
+	            }
+	            
+	        })
+
+	    };
+	    reader.readAsBinaryString(input.files[0]);	// 이때(onload시에) 위에있는 함수가 발동하는 것 같다 
+	    //console.log(input.files[0]);
+	    
+	    
+	}
+	
 	
 	function SelectMarkerVersion(e)
 	{
@@ -394,6 +487,13 @@
 			var data = new FormData($("#insert_form")[0]);
 			var loading = document.querySelector('.load_wrap');
 			
+			/*
+			//formData 안의 값 읽기
+			for(let key of data.keys()) {				// key목록을 읽은다음 그에 해당하는 get(key)=value 값을 함께 나열
+				console.log(key, ":", data.get(key));
+			}
+			*/
+			
 			loading.classList.add('on');
 			
 			$.ajax(
@@ -443,8 +543,12 @@
 			data : {"outcome_id" : e},
 			success : function(result)
 			{
+				console.log("result : ", result);
+				
 				$("#modify_id").val(result.outcome_id);
+				console.log("aaa");
 				$("#modify_username").val(result.user_username);
+				console.log("bbb");
 				$("#modify_crop_id").val(result.marker_id);
 				$("#modify_crop").val(result.marker_crop);
 				$("#modify_version").val(result.marker_version);
@@ -481,6 +585,13 @@
 	function UpdateOutcome()
 	{
 		var data = new FormData($("#update_form")[0]);
+		
+		/*
+		//formData 안의 값 읽기
+		for(let key of data.keys()) {				// key목록을 읽은다음 그에 해당하는 get(key)=value 값을 함께 나열
+			console.log(key, ":", data.get(key));
+		}
+		*/
 		
 		var loading = document.querySelector('.load_wrap');
 		loading.classList.add('on');

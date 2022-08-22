@@ -2,6 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ page import="java.util.*" %>
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -271,7 +272,7 @@
 									alert("수정에 실패하였습니다.");
 								}
 								else
-								{
+								{								
 									alert("수정되었습니다.");
 								}
 							}

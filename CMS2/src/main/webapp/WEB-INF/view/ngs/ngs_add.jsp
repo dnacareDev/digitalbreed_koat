@@ -430,6 +430,7 @@
 		reader.readAsText(file, "UTF-8");
 	}
 	
+
 	function InsertBtn()
 	{
 		var marker_id = $("#genomic_information").val();
@@ -489,6 +490,7 @@
 					},
 					success : function(result)
 					{
+
 						loading.classList.remove('on');
 						
 						$("#outcome_file").val(result);

@@ -2,6 +2,10 @@ package kr.or.ih.api.web;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -29,8 +33,8 @@ import kr.or.ih.api.entity.User;
 import kr.or.ih.api.service.HomeService;
 import kr.or.ih.api.service.MarkerService;
 import kr.or.ih.api.service.ScheduleService;
-import tm.massmail.sendapi.ThunderMassMailSender;
 import tm.massmail.sendapi.ThunderMassMail;
+import tm.massmail.sendapi.ThunderMassMailSender;
 
 
 @Controller
@@ -480,7 +484,10 @@ public class MarkerController
 	// 결과 데이터 등록
 	@ResponseBody
 	@RequestMapping("insertOutcome")
-	public int InsertOutcome(ModelAndView mv, @RequestParam Map<String,String> params, @RequestParam("file") MultipartFile file)
+	public int InsertOutcome(ModelAndView mv, 
+							@RequestParam Map<String,String> params, 
+							@RequestParam("file") MultipartFile file, 
+							@RequestParam(required = false, value = "file2") MultipartFile file2)
 	{
 		String user_username = params.get("user_username");
 		String user_comment = params.get("outcome_comment");
@@ -519,6 +526,31 @@ public class MarkerController
 		outcome.setOutcome_file("upload/outcomeFile/" + date_name + "/" + file.getOriginalFilename());
 		outcome.setOutcome_origin_file(file.getOriginalFilename());
 		
+		// 2022-08-12 | 2번째 파일(not required) 업로드시 파일교체
+		if(!file2.isEmpty()) {
+			System.out.println("file2 not null");
+			
+			//String fileName2 = file2.getOriginalFilename();
+			String fileName2 = "client_list.xlsx";
+			String path2 = "/data/apache-tomcat-9.0.8/webapps/ROOT/upload/sampleFile/";
+			File filePath2 = new File(path2);
+			if(!filePath2.exists()) {
+				filePath2.mkdirs();
+			}
+			
+			try
+			{
+				File f2 = new File(path2 + fileName2);
+				file2.transferTo(f2);
+			}
+	        catch(IOException e)
+	        {
+	        	System.out.println("file2 upload error");
+	        }
+		} 
+		//
+		
+		
 		int result = service.InsertOutcome(outcome);
 		
 		int notice = scheduleService.InsertNotice(outcome);
@@ -528,20 +560,21 @@ public class MarkerController
          tm.setThunderMailURL("192.168.50.42:8080");               
          tm.setWriter("seedcenter");
 
-         tm.setMailTitle("안녕하세요 " + user_username +"님");                        
+         tm.setMailTitle("디지털육종정보화시스템에 분석 결과가 등록 되었습니다.");
          tm.setSenderEmail("ymjeong@koat.or.kr");                  
          tm.setSenderName("디지털육종정보화시스템");                        
          tm.setReceiverName(user_username);                              
 
          tm.setContentType("content");
-         tm.setMailContent("디지털육종정보화시스템에 분석 결과가 등록 되었습니다.<br><br> https://seedcenter.koat.or.kr/digit/ 에서 확인 해 주시기 바랍니다.<br><br><br>전달사항 : " + user_comment);
+         //tm.setMailContent("디지털육종정보화시스템에 분석 결과가 등록 되었습니다.<br><br> https://seedcenter.koat.or.kr/digit/ 에서 확인 해 주시기 바랍니다.<br><br><br>전달사항 : " + user_comment);
+         
+         tm.setMailContent(user_comment);
 
          tm.setTargetType("string");
          tm.setTargetString("이메일,고객명,휴대폰Æ"+user_username+","+user_username+","+"000-000-0000Æ");
          tm.setFileOneToOne("[$email]≠["+user_username+"]ø[$name]≠["+user_username+"]ø[$cellPhone]≠[000-000-0000]");
          String result_mail = tms.send(tm); 
-         System.out.println("result_mail : " + result_mail);	
-         
+                          
 		return result;
 	}
 	
@@ -558,8 +591,20 @@ public class MarkerController
 	// 결과 데이터 수정
 	@ResponseBody
 	@RequestMapping("updateOutcome")
-	public int UpdateOutcome(@RequestParam Map<String,String> params, @RequestParam(required = false, value = "file") MultipartFile file)
+	public int UpdateOutcome(ModelAndView mv,
+							@RequestParam Map<String,String> params, 
+							@RequestParam(required = false, value = "file") MultipartFile file,
+							@RequestParam(required = false, value = "file2") MultipartFile file2)
 	{
+		
+		
+		
+		if(!file2.isEmpty()) {
+			System.out.println("not null");
+		} else {
+			System.out.println("null");
+		}
+		
 		Outcome outcome = new Outcome();
 		outcome.setOutcome_id(Integer.parseInt(params.get("outcome_id")));
 		outcome.setUser_username(params.get("user_username"));
@@ -569,6 +614,7 @@ public class MarkerController
 		outcome.setOutcome_comment(params.get("outcome_comment"));
 		outcome.setOutcome_file(params.get("outcome_file"));
 		outcome.setOutcome_origin_file(params.get("outcome_origin_name"));
+		
 		
 		if(!file.isEmpty())
 		{
@@ -581,12 +627,6 @@ public class MarkerController
 
 			boolean delete = true;
 			
-			/*
-			if(deleteFile.exists())
-			{
-				delete = deleteFile.delete();
-			}
-			*/
 			
 			if(delete)
 			{
@@ -608,6 +648,36 @@ public class MarkerController
 				}
 			}
 		}
+		
+	
+		
+		// 2022-08-12 | 2번째 파일(not required) 업로드시 파일교체
+		if(!file2.isEmpty()) {
+			System.out.println("file2 not null");
+			
+			//String fileName2 = file2.getOriginalFilename();
+			String fileName2 = "client_list.xlsx";
+			String path2 = "/data/apache-tomcat-9.0.8/webapps/ROOT/upload/sampleFile/";
+			File filePath2 = new File(path2);
+			if(!filePath2.exists()) {
+				filePath2.mkdirs();
+			}
+			
+			try
+			{
+				System.out.println("aaa");
+				File f2 = new File(path2 + fileName2);
+				file2.transferTo(f2);
+			}
+	        catch(IOException e)
+	        {
+	        	System.out.println("file2 upload error");
+	        }
+		} else {
+			System.out.println("file2 null;");
+		}
+		//
+		
 		
 		int result = service.UpdateOutcome(outcome);
 		
@@ -704,5 +774,14 @@ public class MarkerController
 		int result = service.UpdateOutcomeResult(outcome_id, outcome_result);
 		
 		return result;
+	}
+	
+	@ResponseBody
+	@RequestMapping("parsingExcel")
+	public List<List<String>> ParsingExcel() {
+		
+		//System.out.println("ajax java success");
+		
+		return ExcelParsing.readToList();
 	}
 }

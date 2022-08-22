@@ -209,7 +209,7 @@
                             </select>
                         </div>
                         <div class="new_data_box">
-                            <label for="user_username">고객 E-mail</label>
+                            <label for="user_username">고객 E1-mail</label>
                             <input type="email" id="user_username" name="user_username">
                         </div>
                     </div>
@@ -261,7 +261,7 @@
                             <input type="text" id="modify_crop" name="marker_crop">
                         </div>
                         <div class="new_data_box">
-                            <label for="analysis_type" class="select_arrow">분석 종류</label>
+                            <label for="analysis_type" class="select_arrow">분111석 종류</label>
                             <select id="modify_type" name="outcome_type">
                                 <!-- <option value="0">염색체 시각화 | Draw karyotype</option> -->
                                 <option value="9">분석결과 | Analysis Result Data</option>
