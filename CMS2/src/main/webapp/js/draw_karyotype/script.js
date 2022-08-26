@@ -4,7 +4,7 @@ var currentClick = "";
 var gffData = {};
 var today = new Date();
 var searchValue = [];
-var maxHeight = 352;
+var maxHeight = 452;
 
 // # . 0 Gff 파일 읽기
 function readGff () {

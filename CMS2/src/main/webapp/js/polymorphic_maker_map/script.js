@@ -166,7 +166,7 @@ function parcingGff(data){
 }
 // table pos 단위 설정
 function changePosText(){
-    var unit = isAdminUser?"(bp)":"";
+    var unit = isAdminUser?"(bp)":"(Mbp)";
     var tablePos = document.querySelectorAll(".tablePos");
     for(var i = 0 ; i < tablePos.length ; i++){
         tablePos[i].innerText = "Pos" + unit;
@@ -286,8 +286,11 @@ function parsingData(xlsxData){
     // drawTable();
     // drawChart();
 }
+
 function sortObj(obj){
-    return Object.fromEntries(Object.entries(obj).sort(([a,],[b,])=>  a.localeCompare(b)))
+	// 이런 방식으로는 chr01, chr02 등 염색체 내의 분자표지명을 가나다순으로 정렬하는 것밖에 안된다
+	// 염색체 안쪽에서 adminPos 기준으로 정렬해야 함
+	return Object.fromEntries(Object.entries(obj).sort(([a,],[b,])=>  a.localeCompare(b)));			
 }
 
 // ------------------------------------------------------
@@ -374,11 +377,11 @@ function parsingUserData(xlsxData){
         let curTitle = getExcelTitleFromData(adminMap[xlsxData[i][titlePivot]],"염색체");
         if(!currentCategory && adminMap[xlsxData[i][titlePivot]] && adminMap[xlsxData[i][titlePivot]][curTitle]){
             
-            console.log(adminMap[xlsxData[i][titlePivot]][curTitle]);
+            //console.log(adminMap[xlsxData[i][titlePivot]][curTitle]);
 
             currentCategory = adminMap[xlsxData[i][titlePivot]][curTitle];
             for(var j = 0 ; j < lengthData.length ; j++){
-                console.log(lengthData[j][0] + " " + currentCategory);
+                //console.log(lengthData[j][0] + " " + currentCategory);
                 if(lengthData[j][0] == currentCategory){
                     parseLengthData[currentCategory] = Number(lengthData[j][1]);
                     parseData[currentCategory] = parseData[currentCategory]?parseData[currentCategory]:{};
@@ -433,7 +436,39 @@ function parsingUserData(xlsxData){
         parseGuestLengthData[key] = getMaxGuestMbNumber(parseData[key]).toFixed(2);
     }
 
-    parseData = sortObj(parseData)
+	//console.log("parseData : ", JSON.parse(JSON.stringify(parseData)));
+
+	// 서버엑셀파일, 인풋엑셀파일을 pos기준 정렬 정렬이 가능하도록 설정
+	let orderedData = {};
+	for(key in parseData) {
+	  //console.log(key);
+	  
+	  function sort(obj, valSelector) {
+		const sortedEntries = Object.entries(obj)
+		  .sort((a, b) =>
+			valSelector(a[1]) > valSelector(b[1]) ? 1 :
+			valSelector(a[1]) < valSelector(b[1]) ? -1 : 0);
+		return new Map(sortedEntries);
+	  }
+
+	  let sortedMap = sort(parseData[key], val => val.adminPos); 
+	  let sortedObj = {}; 
+	  sortedMap.forEach((v,k) => { sortedObj[k] = v });
+
+	  orderedData[key] = sortedObj;
+	}
+	//console.log("orderedData : ", orderedData);
+
+
+
+	//정렬한 객체를 parseData에 대입
+	parseData = orderedData;
+
+
+
+
+
+    //parseData = sortObj(parseData)
 
     if(Object.keys(newUserParseData).length == 0){
         alert("잘못된 엑셀파일입니다.");
@@ -464,6 +499,7 @@ function drawChart(){
         _parseData = parseSearchGffData;
     }
     
+	//console.log("_parseData : ", _parseData);
 
     // 큰 틀 제작
     for(var key in parseLengthData){
@@ -519,12 +555,13 @@ function drawChart(){
         chartElName.appendChild(chartEl); // 큰틀넣기 
         chartWrap.appendChild( chartElName ); // 큰틀 묶음 넣기 
 
-
         // 이름, 라인 넣기
         var divEl = document.querySelector("[data-column='" + _key.replaceAll(".", "_DOT_")+ "']");
         var stackPercent = 100 / parseLengthData[key];
         var highMarginR = 0;
+
         for(var keyStack in _parseData[key]){
+			
             if(_parseData[key][keyStack]["active"]){
                 // 이름
                 var chartStackName = document.createElement('div');
@@ -533,16 +570,20 @@ function drawChart(){
                 var newKeyStack = keyStack.replace("/", "slash");
                 chartStackName.setAttribute("data-stacknamerow", newKeyStack + "_stackNameRow"); // 스택 분기
                 if(isAdminUser){
-                    chartStackName.innerHTML =keyStack+"<br />"+"("+insertComma(roundToTwo( _parseData[key][keyStack]["adminPos"] > 10000 ? _parseData[key][keyStack]["adminPos"] / 1000000 : _parseData[key][keyStack]["adminPos"] ))+"bp)";
+                    //chartStackName.innerHTML =keyStack+"<br />"+"("+insertComma(roundToTwo( _parseData[key][keyStack]["adminPos"] > 10000 ? _parseData[key][keyStack]["adminPos"] / 1000000 : _parseData[key][keyStack]["adminPos"] ))+"bp)";
+					chartStackName.innerHTML =keyStack+"<br />"+"("+insertComma(roundToTwo( _parseData[key][keyStack]["adminPos"]))+"bp)";
                 }else{
-                    chartStackName.innerHTML =keyStack+"<br />"+"("+roundToTwo(_parseData[key][keyStack]["guestPos"])+")";
+                    chartStackName.innerHTML =keyStack+"<br />"+"("+roundToTwo(_parseData[key][keyStack]["guestPos"])+"Mbp)";
                 }
                 chartStackName.style.top = (stackPercent * _parseData[key][keyStack]["adminPos"])+ "%";
                 
+
                 if(clickId == newKeyStack){
                     chartStackName.style.border = "2px solid #000";
                     chartStackName.style.padding = "5px";
                 }
+
+
 
                 // 라인
                 var chartStackLine = document.createElement('div');
@@ -552,6 +593,12 @@ function drawChart(){
                 
                 divEl.appendChild(chartStackLine);
                 divEl.appendChild(chartStackName);
+				
+				// 분자표지명 최소너비 설정
+				// 이유는 모르겠지만 input파일에만 영향을 미침
+				if(chartStackName.offsetWidth < 100) {
+					chartStackName.style.width = 115 + "px";
+				}
                 
                 // 최대 이름 길이
                 if(highMarginR < chartStackName.offsetWidth){
@@ -685,10 +732,13 @@ function drawTableEl(key, keyStack){
     trId.setAttribute("data-tableid" , keyStack);
     tdInput.setAttribute('id', keyStack);
     if(isAdminUser){
-        trPos.innerText = insertComma(stackEl["adminPos"]) != "undefined" ? 
+        /*
+		trPos.innerText = insertComma(stackEl["adminPos"]) != "undefined" ? 
         insertComma(roundToTwo(Number(stackEl["adminPos"]) > 10000 ? Number(stackEl["adminPos"]) / 1000000 : Number(stackEl["adminPos"]) ))
         : 
         roundToTwo(stackEl["guestPos"]) ? roundToTwo(stackEl["guestPos"]) : 0;
+		*/
+		trPos.innerText = insertComma(stackEl["adminPos"]) != "undefined" ? insertComma(roundToTwo(Number(stackEl["adminPos"]))) : 0;
     }else{
         trPos.innerText = roundToTwo(stackEl["guestPos"]) ? roundToTwo(stackEl["guestPos"]) : 0;
     }
@@ -1057,7 +1107,8 @@ function drawModalChart(currentColumn){
             modalStackName.setAttribute("data-modalname", "modalName");
 
             if(isAdminUser){
-                modalStackName.innerHTML =key+"<br />"+"("+ insertComma( roundToTwo(( currentData["adminPos"] >= 10000 ? currentData["adminPos"] / 1000000 : currentData["adminPos"] ))) + "bp)";
+                //modalStackName.innerHTML =key+"<br />"+"("+ insertComma( roundToTwo(( currentData["adminPos"] >= 10000 ? currentData["adminPos"] / 1000000 : currentData["adminPos"] ))) + "bp)";
+				modalStackName.innerHTML =key+"<br />"+"("+ insertComma( roundToTwo(( currentData["adminPos"] ))) + "bp)";
             }else{
                 modalStackName.innerHTML =key+"<br />"+"("+  Number(currentData["guestPos"]).toFixed(2) +")";
             }
@@ -1067,6 +1118,12 @@ function drawModalChart(currentColumn){
             chartStackLine.classList.add("chartStackLine");
             chartStackLine.setAttribute("data-modalline", "modalLine");
             chartStackLine.style.top = (percent * currentData["adminPos"])+ "%";
+
+			// 분자표지명 최소너비 설정
+			// 이유는 모르겠지만 input파일에만 영향을 미침
+			if(modalStackName.offsetWidth < 100) {
+				modalStackName.style.width = 115 + "px";
+			}
             
             chartEl.appendChild(modalStackName);
             chartEl.appendChild(chartStackLine);
@@ -1131,7 +1188,8 @@ function drawModalTable(currentColumn){
         tdId.innerText = key;
         input.setAttribute('id', '_'+ key);
         if(isAdminUser){
-            tdPos.innerText = insertComma( roundToTwo(( parseData[currentColumn][key]["adminPos"] >= 10000 ? parseData[currentColumn][key]["adminPos"] / 1000000 : parseData[currentColumn][key]["adminPos"] )));
+            //tdPos.innerText = insertComma( roundToTwo(( parseData[currentColumn][key]["adminPos"] >= 10000 ? parseData[currentColumn][key]["adminPos"] / 1000000 : parseData[currentColumn][key]["adminPos"] )));
+			tdPos.innerText = insertComma( roundToTwo(( parseData[currentColumn][key]["adminPos"] )));
         }else{
             tdPos.innerText = roundToTwo(parseData[currentColumn][key]["guestPos"]);
         }
@@ -1160,25 +1218,33 @@ function drawModalInformation(currentColumn){
     tbody.innerHTML = "";
 
     var trTitle = document.createElement("tr");
-    trTitle.innerHTML = "<td></td>";
+    //trTitle.innerHTML = "<td>분자표지명</td>";
+	trTitle.innerHTML = "<td></td>";
+
     for(var i = 1 ; i < selectFirst.length ; i++){
         var tdTitle = document.createElement("td");
         tdTitle.innerText = selectFirst[i].innerText;
+		tdTitle.style.minWidth = 50 + "px";
+		tdTitle.style.verticalAlign = "middle";
         trTitle.appendChild(tdTitle);
     }
 
-    
+	tbody.appendChild(trTitle);
+
+    //console.log("userXlsxData : " , userXlsxData);
+	//console.log("parseData : ", parseData);
 
     var isFirst = true;
     for(var key in parseData[currentColumn]){
         if(parseData[currentColumn][key]["active"]){
             for(var i = 0 ; i < userXlsxData.length ; i++){
                 if(userXlsxData[i]["분자표지명"] == key){
-                    var trDesc = document.createElement("tr");
+					var trDesc = document.createElement("tr");
                     trDesc.innerHTML = `<td>${userXlsxData[i]["분자표지명"]}</td>`
                     for(var k in userXlsxData[i]){
-                        if(k!=="번호" && k!=="분자표지명"){
-                            var tdType = document.createElement('td');
+                        //if(k!=="번호" && k!=="분자표지명"){
+                        if(k!=="번호" && k!=="분자표지명" && k !== "염색체명" && k !== "위치(bp)"){
+							var tdType = document.createElement('td');
                             tdType.innerText = userXlsxData[i][k];
                             trDesc.appendChild(tdType);
                         }
@@ -1323,11 +1389,16 @@ function onchangeSelect(){
             parseData[key][keyStack]["active"] = containId.some(item => item == keyStack);
         }
     }
-
+	
+	initVisualWrap();
+	
     initChart();
     initTable();
     drawChart();
     drawTable();
+
+	changePosText();
+	
 }
 
 // ------------------------------------------------------
@@ -1739,7 +1810,8 @@ function onClickPolyRun(e)
     // readMakerFile();
     initVisualWrap();
     onchangeSelect()
-    // initChart();
+    
+	// initChart();
     // initTable();
     // drawChart();
     // drawTable();
@@ -1777,7 +1849,8 @@ function initVisualWrap(){
                             <label>Id</label>
                         </th>
                         <th>
-                            <label class="tablePos">Pos</label>
+                            <label class="tablePos">Pos(Mbp)</label>
+							<!-- <label>Pos(Mbp)</label> -->
                         </th>
                         <th>
                             <label>실물분자표지보유</label>

@@ -455,7 +455,7 @@ function parsingUserData(xlsxData){
     }
 
 	//console.log("parseData : ", parseData);
-	//console.log("parseData : ", JSON.stringify(parseData));
+	//console.log("parseData : ", JSON.parse(JSON.stringify(parseData)));
 
 
 
@@ -569,6 +569,7 @@ function drawChart(){
         chartWrap.appendChild( chartElName ); // 큰틀 묶음 넣기 
 
 
+
         // 이름, 라인 넣기
         var divEl = document.querySelector("[data-column='" + _key.replaceAll(".", "_DOT_")+ "']");
         var stackPercent = 100 / parseLengthData[key];
@@ -601,6 +602,12 @@ function drawChart(){
                 
                 divEl.appendChild(chartStackLine);
                 divEl.appendChild(chartStackName);
+
+				// 분자표지명 최소너비 설정
+				// 이유는 모르겠지만 input파일에만 영향을 미침
+				if(chartStackName.offsetWidth < 100) {
+					chartStackName.style.width = 115 + "px";
+				}
                 
                 // 최대 이름 길이
                 if(highMarginR < chartStackName.offsetWidth){
@@ -1139,6 +1146,12 @@ function drawModalChart(currentColumn){
             chartStackLine.classList.add("chartStackLine");
             chartStackLine.setAttribute("data-modalline", "modalLine");
             chartStackLine.style.top = (percent * currentData["adminPos"])+ "%";
+
+			// 분자표지명 최소너비 설정
+			// 이유는 모르겠지만 input파일에만 영향을 미침
+			if(modalStackName.offsetWidth < 100) {
+				modalStackName.style.width = 115 + "px";
+			}
             
             chartEl.appendChild(modalStackName);
             chartEl.appendChild(chartStackLine);

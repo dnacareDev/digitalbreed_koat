@@ -232,7 +232,7 @@
 	                	<option value="4">데이터 결과</option>
 	                	<!-- option value="5">전체파일</option -->
                     </select>
-                    <div style="margin-right: auto; margin-left:10px;" class="commonBtn download" onclick="<c:out value='onClickDownload(${outcome.outcome_id})'/>'">내려받기</div>                            
+                    <div style="margin-right: auto; margin-left:10px;" class="commonBtn download" onclick="<c:out value='onClickDownload(${outcome.outcome_id})'/>">내려받기</div>                            
         		 </div>
 			    <!-- <div style="margin-bottom: 20px; bottom: 10px;" class="commonBtn" download onclick="onClickDownload()">내려받기</div> -->
 			    
@@ -301,9 +301,10 @@
 		
 	 	function onClickDownload(e)
 	 	{
+			//console.log($("#select_file").val());
 	    	var select_file = $("#select_file").val();
 		    	
-	    	if(select_file == 0)
+	    	if(select_file == 0 || !select_file)
 	    	{
 	    		alert("내려받을 파일을 선택하세요.");
 	    	}
@@ -313,6 +314,7 @@
 		    	a.style.display = 'none';
 		    	
 		    	var a_url = (_url).split(".")[0];
+				a_url = (a_url).split("_result")[0];
 		    	
 		    	if(select_file == 1)
 		    	{
@@ -326,7 +328,7 @@
 		    	}
 		    	else if(select_file == 3)
 		    	{
-		    		a.setAttribute("download", "prepro_result.txt");
+		    		a.setAttribute("download", "mapping_result.txt");
 			    	a.href = a_url + "_mapping_result.txt";
 		    	}
 		    	else if(select_file == 4)

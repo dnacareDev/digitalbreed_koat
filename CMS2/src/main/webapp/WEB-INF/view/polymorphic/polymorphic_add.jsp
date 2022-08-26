@@ -202,7 +202,7 @@
                                      <a download class="ex_data add_ex_data" href="/digit/upload/sampleFile/(업로드용)참외_다형성분자표지_예제파일.xlsx" class="ex_data">샘플파일다운(샘플화일:참외V3.6)</a>
                                     <input type="text" class="file_text" placeholder="" readonly disabled>
                                     <form action="insertOutcomeResult" id="insertForm" method="POST" enctype="multipart/form-data">
-                                    	<input id="input-file" type="file" class="addMabcFile" onchange="readUserExcel()" name="file">
+										<input id="input-file" type="file" class="addMabcFile" onchange="readUserExcel()" name="file">
                                     </form>
                                     <div class="flie_btn_box">
                                         <label for="input-file" class="file_add">파일첨부</label>
@@ -281,28 +281,27 @@
                     <div class="tableWrap">
                         <table class="table">
                             <thead>
+								<!--
                                 <tr>
                                     <th>
                                         <input onchange="onChangeAllCkBox(this)" type="checkbox">
                                     </th>
                                     <th>
                                         <label>Chr</label>
-                                        <!-- <input type="text" id="_Id_2"> -->
                                     </th>
                                     <th>
                                         <label>Id</label>
-                                        <!-- <input type="text" id="_Id_2"> -->
                                     </th>
                                     <th>
-                                        <label>Pos</label>
-                                        <!-- <input type="text" id="_Id_2"> -->
+                                        <label>Pos(Mbp)</label>
                                     </th>
                                     <th>
                                         <div>
-                                            <label>분자표지보유</label>
+                                            <label>실물분자표지보유</label>
                                         </div>
                                     </th>
                                 </tr>
+								-->
                             </thead>
                             <tbody class="markerTbody"></tbody>
                         </table>
