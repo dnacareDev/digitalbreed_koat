@@ -22,12 +22,15 @@ public class ExcelParsing {
 			XSSFWorkbook workbook = new XSSFWorkbook(fi);
 			XSSFSheet sheet = workbook.getSheetAt(0);
 			
-			for(int i=0; i<sheet.getLastRowNum(); i++) {
+//			System.out.println("sheet.getPhysicalNumberOfRows() : " + sheet.getPhysicalNumberOfRows());
+			
+			for(int i=0; i<sheet.getPhysicalNumberOfRows(); i++) {
 				XSSFRow row = sheet.getRow(i);
 				if(row != null) {
 					List<String> cellList = new ArrayList<String>();
 					for(int j=0; j<row.getLastCellNum(); j++) {
 						XSSFCell cell = row.getCell(j);
+//						System.out.println(i + " " + cell);
 						if(cell != null) {
 							cellList.add( cellReader(cell) ); //셀을 읽어와서 List에 추가
 						}
