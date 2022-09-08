@@ -345,10 +345,8 @@
                 <div class="modalHeader">
                     <div class="modalTitle">Chr12 상세</div>
                     <div class="data_header" style="flex-direction:row;">
-                    	<!--  
                     	<input type="number" id="polyModalInput">
                         <button id="polyModalInput_btn" class="export_btn" onclick="onClickanalytics()" style="margin-right:20px;">자동 분석</button>
-                        -->
                         <button class="export_btn" onclick="downloadModalImg()">내려받기</button>
                         <!-- button class="export_btn" onclick="onClickanalytics()" style="margin-right:20px;">자동 분석</button -->
                     </div>

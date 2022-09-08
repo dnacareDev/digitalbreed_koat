@@ -242,6 +242,7 @@
                             <label for="user_username">
                             	고객 E-mail
                             	<a download href="upload/sampleFile/client_list.xlsx" style="color:blue;">&nbsp;(목록 다운로드)</a>
+                            	<button type="button" style="float:right; margin-top: 2px; margin-left: 2px;" id="modify_client" onclick="modify_client_list1()"><img src="./images/export.png" title="목록 업로드">&nbsp;</button>
                             	<label for="datalist_file" style="color:blue; display:block; float:right; cursor:pointer">&nbsp;(목록 변경)</label>
                             	<input type="file" class="file_in" id="datalist_file" name="file2" onchange="Excel_to_DataList(event)" style="display:none;">
                             </label>
@@ -317,6 +318,7 @@
                             <label for="modify_username">
                             	고객 E-mail
                             	<a download href="upload/sampleFile/client_list.xlsx" style="color:blue;">&nbsp;(목록 다운로드)</a>
+                            	<button type="button" style="float:right; margin-top: 2px; margin-left: 2px;" id="modify_client" onclick="modify_client_list2()"><img src="./images/export.png" title="목록 업로드">&nbsp;</button>
                             	<label for="datalist_file2" style="color:blue; display:block; float:right; cursor:pointer">&nbsp;(목록 변경)</label>
                             	<input type="file" class="file_in" id="datalist_file2"  name="file2" onchange="Excel_to_DataList(event)" style="display:none;">
                             </label>
@@ -392,19 +394,18 @@
 	function Read_DataList() {
 		
 		$.ajax({
-					url : "parsingExcel",
-					method : "POST",
-					success : function(result) {
-						console.log("client_list result : ", result);
-						
-						// 첫줄은 제외해야 하므로 i=1
-						for(let i=1 ; i<result.length ; i++) {
-							$('#list').append('<option value="' + result[i][2] + '">' + result[i][0] + '(' + result[i][1] + ')' + '</option>')
-						}
+				url : "parsingExcel",
+				method : "POST",
+				success : function(result) {
+					console.log("client_list result : ", result);
+					
+					// 첫줄은 제외해야 하므로 i=1
+					for(let i=1 ; i<result.length ; i++) {
+						$('#list').append('<option value="' + result[i][2] + '">' + result[i][0] + '(' + result[i][1] + ')' + '</option>')
 					}
+				}
 		});
 	}
-	
 	
 	
 	function Excel_to_DataList(event) {
@@ -431,8 +432,57 @@
 	    };
 	    reader.readAsBinaryString(input.files[0]);	// 이때(onload시에) 위에있는 함수가 발동하는 것 같다 
 	    //console.log(input.files[0]);
-	    
-	    
+	}
+	
+	function modify_client_list1() {
+		if( !$("#datalist_file")[0].files[0] ) {
+			alert("파일을 첨부해주세요.");
+			return;
+		}
+		console.log("excel upload (신규등록)");
+		
+		let myFormData = new FormData();
+		myFormData.append('file2', $("#datalist_file")[0].files[0]);
+
+		$.ajax(
+		{
+			url : "uploadDataList",
+			type : "POST",
+			cache: false,
+		    contentType: false,
+		    processData: false,
+			data : myFormData,
+			success : function(result) {
+				console.log("success");
+				alert("고객 E-mail 목록이 변경되었습니다.");
+			}
+		});
+		
+	}
+	
+	function modify_client_list2() {
+		if( !$("#datalist_file2")[0].files[0] ) {
+			alert("파일을 첨부해주세요.");
+			return;
+		}
+		console.log("excel upload (수정)");
+		
+		let myFormData = new FormData();
+		myFormData.append('file2', $("#datalist_file2")[0].files[0]);
+		
+		$.ajax(
+		{
+			url : "uploadDataList",
+			type : "POST",
+			cache: false,
+		    contentType: false,
+		    processData: false,
+			data : myFormData,
+			success : function(result) {
+				console.log("success");
+				alert("고객 E-mail 목록이 변경되었습니다.");
+			}
+		});
 	}
 	
 	

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -186,5 +187,42 @@ public class NgsController
         
 		
 		return "common/web/mabanalysis/resultfiles/" + date_name + "/" + date_name;
+	}
+	
+	
+	@ResponseBody
+	@RequestMapping("searchNgsRawFiles")
+	public LinkedList<String> searchNgsRawFiles(@RequestParam("jobid") String jobid) {
+		
+		//System.out.println("jobid : " + jobid);
+		
+		LinkedList<String> list = new LinkedList<>();
+		
+		String path = "/data/apache-tomcat-9.0.8/webapps/ROOT/common/web/mabanalysis/resultfiles/" + jobid;
+		
+		File dir = new File(path);
+		File[] files = dir.listFiles();
+		
+		for(int i=0 ; i<files.length ; i++) {
+			File file = files[i];
+			
+			String fileName = file.getName();
+			String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
+			
+			//System.out.println(fileName);
+			//System.out.println(extension);
+			
+			if(fileName.contains(jobid) || fileName.contains("duplicate_report") || fileName.equals("combined.final.vcf.snpmatrix.txt") || fileName.equals("combined.unionpos.txt") ) {
+				continue;
+			}
+			
+			if(file.isFile() && (extension.equals("fastq") || extension.equals("fasta") || extension.equals("txt") ) ) {
+				list.push(fileName);
+			}
+		}
+		
+		//System.out.println("list : " + list);
+		
+		return list;
 	}
 }

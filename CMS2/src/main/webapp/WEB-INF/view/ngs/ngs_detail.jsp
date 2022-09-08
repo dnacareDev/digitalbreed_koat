@@ -29,6 +29,16 @@
 	    	justify-content: right;
 		  }
 		  
+		  #download_fastq {
+		  	width: 170px; 
+		  	height: 40px; 
+		  	border: 1px solid #E6EBEE; 
+		  	border-radius: 4px; 
+		  	background: #fff url('./images/select_arrow.png') no-repeat center right 12px/8px; 
+		  	padding: 0 16px;
+		  	font-weight: 700;
+		  }
+		  
     </style>
 </head>
 <body>
@@ -169,6 +179,9 @@
                 <div class="data_table_title_wrap">
                     <h2 class="data_table_title">NGS MABC [NGS MABC]</h2>
                     <a class="re_down_btn result_down_btn" download href="<c:out value='/digit/${outcome.outcome_file}'/>" onclick="<c:out value='DownloadBtn(${outcome.outcome_id});'/>" style="margin-left: 20px;">결과파일다운</a>
+                	<select class="downloadSelectBox" id="download_fastq" onchange="rawDataDownload(this.value)">
+                    	<option value="-1" disabled hidden selected>Raw File 다운로드</option>
+                    </select>
                 </div>
                 <div class="mab_top_bar">
                     <div class="mab_bar_left mab_bar">
@@ -185,6 +198,14 @@
                                 	<option value=""><c:out value="${outcome.marker_version}"/></option>
                             	</select>
                             </div>
+                            <!--  
+                            <div class="select_wrap" style="margin-left:5px;">
+                                <span>Raw File 다운로드</span>
+                                <select class="downloadSelectBox" id="download_fastq" style="margin-top:5px;" onchange="rawDataDownload(this.value)">
+                               		<option value="-1" style="color:grey;" disabled hidden selected>파일 선택</option>
+                               	</select>
+                            </div>
+                            -->
                         </div>
 
                         <div class="input_file_wrap">
@@ -338,6 +359,44 @@
 	<div class="dim" style="display:none"></div>
     </body>
 <script type="text/javascript">
+
+	$(function() {
+		//console.log('outcomefile : ${outcome.outcome_file}');
+		
+		let jobid = "${outcome.outcome_file}".split("/")[4];
+		//console.log("jobid : ", jobid);
+		
+		$.ajax(
+		{
+			url: "searchNgsRawFiles",
+			method: "POST",
+			dataType: "json",
+			data: {"jobid" : jobid},
+			success: function(result) {
+				console.log("counting success : ", result);
+				
+				for(let i=0 ; i<result.length ; i++) {
+					let file_name = result[i]
+					//let path = "common/web/mabanalysis/resultfiles/"+ jobid +"/"+ file_name;
+					console.log("file_name : ", file_name);
+					$("#download_fastq").append(`<option value="\${file_name}" > \${file_name} </option>`);
+				}
+			}
+		}); 
+	});
+	
+	function rawDataDownload(file_name) {
+		console.log("file name : ", file_name);
+		let jobid = "${outcome.outcome_file}".split("/")[4];
+		console.log("jobid : ", jobid);
+		
+		let temp_a = document.createElement('a');
+		temp_a.setAttribute('href', `common/web/mabanalysis/resultfiles/\${jobid}/\${file_name}`);
+		temp_a.setAttribute('download', `\${file_name}`)
+		console.log(temp_a);
+		temp_a.click();
+	}
+
 	document.addEventListener('DOMContentLoaded', () => {
 	    const outList = document.querySelectorAll('.out_list');
 	    const navList = document.querySelectorAll('.list_link');

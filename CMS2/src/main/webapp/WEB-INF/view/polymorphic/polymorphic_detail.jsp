@@ -307,10 +307,8 @@
 	                    <!-- input type="number" id="polyModalInput" -->
                         <!-- <button class="export_btn" onclick="downloadModalImg()">내려받기</button> -->
                         <!-- button class="export_btn" onclick="onClickanalytics()" style="margin-right:20px;">자동 분석</button -->
-                        <!--  
                         <input type="number" id="polyModalInput">
                         <button id="polyModalInput_btn" class="export_btn" onclick="onClickanalytics()" style="margin-right:20px;">자동 분석</button>
-                        -->
                         <button class="export_btn" onclick="downloadModalImg()">내려받기</button>
 
                     </div>

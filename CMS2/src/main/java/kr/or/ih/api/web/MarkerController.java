@@ -588,6 +588,46 @@ public class MarkerController
 		return result;
 	}
 	
+	// 명단 파일 업데이트
+	@ResponseBody
+	@RequestMapping("uploadDataList")
+	public int uploadDataList(@RequestParam("file2") MultipartFile file2) {
+		
+		if(!file2.isEmpty()) {
+			System.out.println("not null");
+		} else {
+			System.out.println("null");
+		}
+		
+		
+		if(!file2.isEmpty()) {
+			System.out.println("file2 exists");
+			
+			//String fileName2 = file2.getOriginalFilename();
+			String fileName2 = "client_list.xlsx";
+			String path2 = "/data/apache-tomcat-9.0.8/webapps/ROOT/upload/sampleFile/";
+			File filePath2 = new File(path2);
+			if(!filePath2.exists()) {
+				filePath2.mkdirs();
+			}
+			
+			try
+			{
+				System.out.println("aaa");
+				File f2 = new File(path2 + fileName2);
+				file2.transferTo(f2);
+			}
+	        catch(IOException e)
+	        {
+	        	System.out.println("file2 upload error");
+	        }
+		} else {
+			System.out.println("file2 not exist");
+		}
+		
+		return -1;
+	}
+	
 	// 결과 데이터 수정
 	@ResponseBody
 	@RequestMapping("updateOutcome")
@@ -650,7 +690,7 @@ public class MarkerController
 		}
 		
 	
-		
+		/*
 		// 2022-08-12 | 2번째 파일(not required) 업로드시 파일교체
 		if(!file2.isEmpty()) {
 			System.out.println("file2 not null");
@@ -677,7 +717,7 @@ public class MarkerController
 			System.out.println("file2 null;");
 		}
 		//
-		
+		*/
 		
 		int result = service.UpdateOutcome(outcome);
 		

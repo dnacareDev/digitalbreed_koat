@@ -24,9 +24,9 @@
     <script src="/digit/js/nav.js"></script>
     <script src="/digit/js/alarm.js"></script>
     <style>
-      #main .view {
-    	justify-content: right;
-	}
+    	#main .view {
+    		justify-content: right;
+		}
     </style>
 </head>
 <body>
@@ -167,6 +167,9 @@
                 <div class="data_table_title_wrap">
                     <h2 class="data_table_title">SNP 분석 [SNP analysis]</h2>
                     <!-- <a download href="/digit/dataFile/test_MABC.xlsx">결과파일다운</a> -->
+                    <select class="downloadSelectBox" id="download_fastq" style="margin-left:10px; width:170px;" onchange="rawDataDownload(this.value)">
+                    	<option value="-1"  disabled hidden selected>Raw File 다운로드</option>
+                    </select>
                 </div>
                 <div class="mab_top_bar detail_mab_bar">
                     <div class="mab_bar_left mab_bar">
@@ -183,13 +186,17 @@
                                     <option value=""><c:out value="${outcome.marker_version}"/></option>
                                 </select>
                             </div>
-                            <!-- div class="select_wrap">
-                                <span class="data_name"></span> 
-                                <button style="padding: 0;" class="save" onclick="clearScreen()">초기화</button>
-                            </div -->
+                            <!--  
+                            <div class="select_wrap" style="margin-left:5px;">
+                                <span>Raw File 다운로드</span>
+                                <select class="downloadSelectBox" id="download_fastq" onchange="rawDataDownload(this.value)">
+                               		<option value="-1" style="color:grey;" disabled hidden selected>파일 선택</option>
+                               	</select>
+                            </div>
+                            -->
                         </div>
                   	</div>
-                    
+                    <!--
                     <div class="mab_bar_right mab_bar" style="display:none;">
                         <div class="add_file_box">
                             <div class="select_wrap input_mab_wrap">
@@ -217,6 +224,7 @@
                         </div>
                         <button type="button" class="sample_add_btn">+</button>
                     </div>
+                    -->
                     
                     <div class="view view_box">
                         <!-- div class="commonBtn" onclick="onClickRun()">분석실행</div -->	
@@ -291,6 +299,44 @@
 	
 	<div class="dim" style="display:none"></div>
 	<script type="text/javascript">
+	
+		//JSTL 변수 확인
+		$(function() {
+			//console.log('outcomefile : ${outcome.outcome_file}');
+			
+			let jobid = "${outcome.outcome_file}".split("/")[4];
+			//console.log("jobid : ", jobid);
+			
+			$.ajax(
+			{
+				url: "searchSnpRawFiles",
+				method: "POST",
+				dataType: "json",
+				data: {"jobid" : jobid},
+				success: function(result) {
+					//console.log("counting success : ", result);
+					
+					for(let i=0 ; i<result.length ; i++) {
+						let file_name = result[i]
+						//console.log("file_name : ", file_name);
+						$("#download_fastq").append(`<option value="\${file_name}" > \${file_name} </option>`);
+					}
+				}
+			});
+		});
+		
+		function rawDataDownload(file_name) {
+			console.log("file name : ", file_name);
+			let jobid = "${outcome.outcome_file}".split("/")[4];
+			console.log("jobid : ", jobid);
+			
+			let temp_a = document.createElement('a');
+			temp_a.setAttribute('href', `common/web/snpanalysis/resultfiles/\${jobid}/\${file_name}`);
+			temp_a.setAttribute('download', `\${file_name}`)
+			console.log(temp_a);
+			temp_a.click();
+		}
+	
 	 	function numberWithCommas(x)
 	 	{
 	 		return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
