@@ -215,7 +215,10 @@
                                 </div>
                             </div>
                             <div class="view">
+								<!--
                                 <button class="commonBtn" onclick="onClickView(1);">분자표지맵 분석실행</button>
+								-->
+								<button class="commonBtn" onclick="onClickView_2(1);">분자표지맵 분석실행</button>
                             </div>
 	                        <p class="give_info de_give_info"><c:out value="${marker[0].marker_credit}"/></p>
                         </div>

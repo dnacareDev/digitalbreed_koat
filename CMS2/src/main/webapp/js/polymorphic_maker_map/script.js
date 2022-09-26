@@ -761,7 +761,15 @@ function drawTableEl(key, keyStack){
 }
 // 차트 클릭 
 function addClickEventChart(){
-    var chartEls = document.querySelectorAll(".chartEl");
+    
+	// admin일 경우 단위입력 bp, 일반사용자일 경우 단위입력 Mbp
+	if(isAdminUser) {
+		document.querySelector("#polyModalInput").placeholder = "단위 : bp";
+	} else {
+		document.querySelector("#polyModalInput").placeholder = "단위 : Mbp";
+	}
+
+	var chartEls = document.querySelectorAll(".chartEl");
     for(var i = 0 ; i < chartEls.length ; i++){
         chartEls[i].addEventListener("dblclick", function(e){
             var currentTarget = e.target;        
@@ -779,6 +787,8 @@ function addClickEventChart(){
             drawModalTable(currentColumn);
         })
     }
+
+
 
     var chartStack = document.querySelectorAll(".chartStack");
     for(var i = 0 ; i < chartStack.length ; i++){
@@ -1174,6 +1184,7 @@ function drawModalChart(currentColumn){
     addEventStack(currentColumn)
 }
 function drawModalTable(currentColumn){
+
     var modalTableBody = document.querySelector(".modalTableBody");
     informationArr = [];
     for(var key in parseData[currentColumn]){
@@ -1215,11 +1226,13 @@ function drawModalInformation(currentColumn){
     if(selectFirst.length == 1){return;}
     selectFirst = [...selectFirst];
 
+
+
     tbody.innerHTML = "";
 
     var trTitle = document.createElement("tr");
-    //trTitle.innerHTML = "<td>분자표지명</td>";
-	trTitle.innerHTML = "<td></td>";
+    trTitle.innerHTML = "<td>분자표지명</td>";
+	//trTitle.innerHTML = "<td></td>";
 
     for(var i = 1 ; i < selectFirst.length ; i++){
         var tdTitle = document.createElement("td");
@@ -1250,8 +1263,8 @@ function drawModalInformation(currentColumn){
                         }
                     }
                     if(isFirst){
-                        isFirst = false;
-                      //  tbody.appendChild(trTitle);
+						isFirst = false;
+						//tbody.appendChild(trTitle);
                     }
                     tbody.appendChild(trDesc);
                 }
@@ -1884,11 +1897,96 @@ function initVisualWrap(){
 //                         자동 분석 클릭
 // ------------------------------------------------------
 function onClickanalytics(){
+	
+	const polyModalInput = document.querySelector("#polyModalInput");
+    const _value = Number(polyModalInput.value);
+	let posArr = [];
+	let gapArr = [];
 
+
+	if(!_value) {
+		//alert("자동 분석에 필요한 값을 입력해 주세요.");
+		return;
+	}
+
+
+	const modalTableBody = document.querySelector(".modalTableBody");
+    const trEls = modalTableBody.children;
+    for(let i=0 ; i<trEls.length ; i++){
+        if(trEls[i].children[0].querySelector('.modalTableInput').checked) {
+			//gapArr.push(trEls[i].children[1].innerText)
+			posArr.push({
+				active: true,
+				id: trEls[i].children[1].innerText,
+				pos: Number(trEls[i].children[2].innerText.replaceAll(",",""))
+			});
+		}
+    }
+
+
+	//gapArr.push(posArr[0]);
+	let i_new = 0
+	for(let i=1 ; i<posArr.length ; i++) {
+		if(posArr[i].pos - posArr[i_new].pos < _value) {
+			posArr[i].active = false;
+			gapArr.push(posArr[i].id);
+		} else {
+			i_new = i;
+		}
+	}
+
+	console.log(posArr);
+	console.log(gapArr);
+
+
+
+	const set = new Set(gapArr);
+    let autoCount = 0;
+    gapArr = [...set];
+    autoStatus = true;
+
+
+    let auto = setInterval(() => {
+        if(gapArr.length == autoCount || !autoStatus){
+            
+            //initModalChart();
+            //initModalModal();
+            //if(autoStatus){
+            //    drawModalChart(clickName);
+            //    drawModalTable(clickName);
+            //}
+
+            autoCount = 0;
+            clearInterval(auto);
+            return;
+        }
+
+		/*
+        for(var key in parseData[clickName]){
+            parseData[clickName][key]["active"] = false;
+        }
+		*/
+
+        for(let i = 0 ; i <= autoCount;i++){
+            parseData[clickName][gapArr[i]]["active"] = false;
+        }
+        initModalChart();
+        initModalModal();
+        drawModalChart(clickName);
+        drawModalTable(clickName);
+        
+    	autoCount++;
+    }, 1000);
+
+
+
+	// 각 row의 체크여부
+	// trEls[0].children[0].querySelector('.modalTableInput').checked
+
+/*
     var polyModalInput = document.querySelector("#polyModalInput");
     var _value = polyModalInput.value;
     var gapArr = [];
-
 
     // 자동분석 값이 없을때 
     if(!_value){
@@ -1934,7 +2032,7 @@ function onClickanalytics(){
     
     }
 
-    
+
     var set = new Set(gapArr);
     var autoCount = 0;
     gapArr = [...set];
@@ -1943,13 +2041,13 @@ function onClickanalytics(){
 
     var auto = setInterval(() => {
         if(gapArr.length == autoCount || !autoStatus){
-            /*
-            initModalChart();
-            initModalModal();
-            if(autoStatus){
-                drawModalChart(clickName);
-                drawModalTable(clickName);
-            }*/
+            
+            //initModalChart();
+            //initModalModal();
+            //if(autoStatus){
+            //    drawModalChart(clickName);
+            //    drawModalTable(clickName);
+            //}
 
             autoCount = 0;
             clearInterval(auto);
@@ -1971,7 +2069,7 @@ function onClickanalytics(){
         
     	autoCount++;
     }, 1000);
-    
+*/    
     
 }
 

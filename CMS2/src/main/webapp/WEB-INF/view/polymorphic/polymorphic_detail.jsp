@@ -206,12 +206,22 @@
                                 </div>
                                 <div class="select_top_box">
                                     <label>
+										<!--
                                         <select class="selectSecond com_select" onchange="onchangeSelect()">
+                                            <option disabled selected>모본 선택</option>
+                                        </select>
+										-->
+										<select class="selectSecond com_select">
                                             <option disabled selected>모본 선택</option>
                                         </select>
                                     </label>
                                     <label>
+										<!--
                                         <select class="selectFirst com_select" onchange="onchangeSelect()">
+                                            <option disabled selected>부본 선택</option>
+                                        </select>
+										-->
+										<select class="selectFirst com_select">
                                             <option disabled selected>부본 선택</option>
                                         </select>
                                     </label>

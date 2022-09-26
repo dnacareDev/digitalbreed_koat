@@ -752,11 +752,11 @@ function onChangeGff(e){
             if(!lengthData[gffData[key].chr]){continue}
 
             _searchValue.push(key);
-            /*
+			/*
             if(++searchCount > 100){
                 break;
             }
-            */
+			*/
         }
     }
     

@@ -210,14 +210,24 @@
                                 </div>
                                 <div class="select_top_box">
                                   <label>
+										<!--
                                         <select class="selectSecond com_select" onchange="onchangeSelect()">
+                                            <option disabled selected>모본 선택</option>
+                                        </select>
+										-->
+										<select class="selectSecond com_select">
                                             <option disabled selected>모본 선택</option>
                                         </select>
                                     </label>
                                     <label>
+										<select class="selectFirst com_select">
+                                            <option disabled selected>부본 선택</option>
+                                        </select>
+										<!--
                                         <select class="selectFirst com_select" onchange="onchangeSelect()">
                                             <option disabled selected>부본 선택</option>
                                         </select>
+										-->
                                     </label>
                                 </div>
                               	<div class="memo_wrap">
@@ -345,7 +355,7 @@
                 <div class="modalHeader">
                     <div class="modalTitle">Chr12 상세</div>
                     <div class="data_header" style="flex-direction:row;">
-                    	<input type="number" id="polyModalInput">
+                    	<input type="number" id="polyModalInput" style="padding-left:10px;">
                         <button id="polyModalInput_btn" class="export_btn" onclick="onClickanalytics()" style="margin-right:20px;">자동 분석</button>
                         <button class="export_btn" onclick="downloadModalImg()">내려받기</button>
                         <!-- button class="export_btn" onclick="onClickanalytics()" style="margin-right:20px;">자동 분석</button -->

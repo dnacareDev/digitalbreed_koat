@@ -22,6 +22,7 @@ var today = new Date();
 var orginMABCXlsx = null;
 var sortType = 0;
 var parseData = {};
+var maxHeight = 400;
 
 // # . 0 Len 파일 읽기
 function onChangeLen(e) {
@@ -100,8 +101,6 @@ function readExcel() {
             event.target.value = null;
             return
         };
-
-		//debugger;
 
         document.querySelector(".file_text").value = input.files[0].name;
         var data = reader.result;
@@ -549,7 +548,8 @@ function buildGraph() {
 
     // 클 틀 생성
     for (var key in chartDataArr) {
-        if (count == 0) {
+		
+		if (count == 0) {
             var chrNameBar = document.createElement('div');
             var chrNameDefault = document.createElement('div');
             var chrNameEl = document.createElement('div');
@@ -604,6 +604,115 @@ function buildGraph() {
         }
 
 
+		//console.log("key? : ", key); 
+		let eachSampleArr = [];
+		for(let keyChr in chrTotalData) {
+
+			let eachChrArr = [];
+
+			//염색체 순서 정렬(오름차순)
+			function compare_lname(a,b) {
+				if ( a.pos < b.pos){
+					return -1;
+				}
+				if ( a.pos > b.pos){
+					return 1;
+				}
+					return 0;
+			}
+
+			for (let i=0 ; i<chartDataArr[key].length ; i++) {
+				if(keyChr == chartDataArr[key][i]["chr"]) {
+					eachChrArr.push(chartDataArr[key][i]);
+				}
+			}
+			//pos 기준 오름차순 정렬(정렬하지 않으면 그래프가 제대로 출력되지 않는다)
+			eachChrArr.sort(compare_lname);
+			eachSampleArr.push(eachChrArr);
+		} 
+		//console.log(eachSampleArr);
+		//console.time("flat");
+		const flatSampleArr = [].concat(...eachSampleArr);
+		//console.timeEnd("flat");
+
+		//console.log(flatSampleArr);
+
+		for (let i=0 ; i<flatSampleArr.length ; i++) {
+			const chrPos = flatSampleArr[i]["pos"];
+
+            const divElSmallStack = document.createElement('div');
+            divElSmallStack.setAttribute("data-pos", chrPos);
+            divElSmallStack.setAttribute("data-chr", flatSampleArr[i]["chr"]);
+            divElSmallStack.setAttribute("data-type", flatSampleArr[i]["type"]);
+            divElSmallStack.classList.add("chrStackSmall");
+
+			let gap = 0;
+
+			if (i == 0) {
+                // 제일 처음
+                gap = chrPos + ((flatSampleArr[i + 1]["pos"] - chrPos) / 2);
+
+                if (flatSampleArr[i]["chr"] !== flatSampleArr[i + 1]["chr"]) {
+                    gap = "full";
+                }
+            } else {
+                // 제일 끝
+                if (i == flatSampleArr.length - 1) {
+                    gap = (lengthData[flatSampleArr[i]["chr"]] - chrPos) + ((chrPos - flatSampleArr[i - 1]["pos"]) / 2)
+                } else {
+
+                    if ((flatSampleArr[i]["chr"] !== flatSampleArr[i - 1]["chr"]) && (flatSampleArr[i]["chr"] !== flatSampleArr[i + 1]["chr"])) {
+                        gap = "full";
+                    } else {
+                        // 다음과 동일할때 
+                        if (flatSampleArr[i]["chr"] == flatSampleArr[i + 1]["chr"]) {
+                            // 이전과 동일할때
+                            if (flatSampleArr[i]["chr"] == flatSampleArr[i - 1]["chr"]) {
+                                gap = ((chrPos - flatSampleArr[i - 1]["pos"]) / 2) + ((flatSampleArr[i + 1]["pos"] - chrPos) / 2);
+                            } else {
+                                gap = chrPos + (flatSampleArr[i + 1]["pos"] - chrPos) / 2;
+                            }
+                        } else {
+                           gap = (lengthData[flatSampleArr[i]["chr"]] - chrPos) + ((chrPos - flatSampleArr[i - 1]["pos"]) / 2);
+                        }
+                    }
+                }
+            }
+
+            var currentChr = flatSampleArr[i]["chr"];
+            var divElSmall = divEl.querySelector("[data-column='" + currentChr + "']");
+
+            chrPercent[key][currentChr] = chrPercent[key][currentChr] ? chrPercent[key][currentChr] : 0;
+
+
+            if (gap == "full") {
+                divElSmallStack.style.height = "100%";
+            } else if (gap < 0) {
+                divElSmallStack.style.height = "100%";
+            }
+            else {
+                divElSmallStack.style.height = (100 / lengthData[currentChr]) * gap + "%";
+            }
+
+            // 배경색
+            if (flatSampleArr[i]["type"] == "A") {
+                divElSmallStack.style.backgroundColor = "#6982ff"
+                chrPercent[key][currentChr]++;
+            } else if (flatSampleArr[i]["type"] == "B") {
+                chrPercent[key][currentChr] = chrPercent[key][currentChr] + 2;
+                divElSmallStack.style.backgroundColor = "#ff6982"
+            } else {
+                divElSmallStack.style.backgroundColor = "#a3a3a3"
+            }
+
+            if (divElSmall) {
+                divElSmall.appendChild(divElSmallStack);
+            }
+			
+        }
+
+/*이 영역에서 그래프(퍼센트 생성)*/
+		/*
         // 작은거 안에 작은거 생성 
         for (var i = 0; i < chartDataArr[key].length; i++) {
             var chrPos = chartDataArr[key][i]["pos"];
@@ -617,6 +726,7 @@ function buildGraph() {
 
             // 높이값
             var gap = 0;
+		
             if (i == 0) {
                 // 제일 처음
                 gap = chrPos + ((chartDataArr[key][i + 1]["pos"] - chrPos) / 2);
@@ -642,7 +752,7 @@ function buildGraph() {
                                 gap = chrPos + (chartDataArr[key][i + 1]["pos"] - chrPos) / 2;
                             }
                         } else {
-                            gap = (lengthData[chartDataArr[key][i]["chr"]] - chrPos) + ((chrPos - chartDataArr[key][i - 1]["pos"]) / 2);
+                           gap = (lengthData[chartDataArr[key][i]["chr"]] - chrPos) + ((chrPos - chartDataArr[key][i - 1]["pos"]) / 2);
                         }
                     }
                 }
@@ -653,14 +763,6 @@ function buildGraph() {
 
             chrPercent[key][currentChr] = chrPercent[key][currentChr] ? chrPercent[key][currentChr] : 0;
 
-            // if(currentChr == "chr12"){
-            //     console.log(gap);
-            //     console.log( chrPos);
-            //     console.log( chartDataArr[key][i]);
-            //     console.log( lengthData[chartDataArr[key][i]["chr"]]);
-
-
-            // }
 
             if (gap == "full") {
                 divElSmallStack.style.height = "100%";
@@ -685,9 +787,10 @@ function buildGraph() {
             if (divElSmall) {
                 divElSmall.appendChild(divElSmallStack);
             }
-
-        }
+			
+        }*/
     }
+
     // 점선 추가
     var graphContainer = document.querySelector(".graphContainer");
     for (var key in lengthData) {
@@ -722,8 +825,6 @@ function buildGraph() {
 
     // 새로운 퍼센트 20220303
     for (var key in chrPercent) {
-
-		
 
         for (var keySmall in chrPercent[key]) {
 
@@ -893,6 +994,7 @@ function addGraphEvent() {
         });
 
         graphWrap.addEventListener("dblclick", function (e) {
+			cnt=0;
             if (e.path[0].classList.contains("chrStackSmall")) {
                 var modalSelectOption = document.querySelectorAll(".modalSelectOption");
                 if (modalSelectOption) {
@@ -1241,7 +1343,8 @@ function downloadModalImg() {
     initAnimation();
     window.scrollTo(0, 0);
     var modalGraph_scale = document.querySelector(".modalGraph_scale");
-    modalGraph_scale.style.transform = "scale(1)";
+    //modalGraph_scale.style.transform = "scale(1)";
+	modalGraph_scale.style.transform = "";
 
     var cloneParent = document.createElement('div');
     cloneParent.classList.add("cloneParent")
@@ -1250,21 +1353,43 @@ function downloadModalImg() {
     var modalGraphEl = cloneEl.querySelectorAll(".modalGraphEl");
     for (var i = 0; i < modalGraphEl.length; i++) {
         modalGraphEl[i].style.overflow = "unset";
+		//console.log(modalGraphEl[i]);
     }
     cloneEl.style.overflow = "unset";
     cloneEl.style.width = "unset";
 
+
     cloneParent.appendChild(cloneEl);
     document.querySelector("body").appendChild(cloneParent);
 
+	
+	for(let i=0 ; i<cloneEl.querySelectorAll('.modalGraphEl').length ; i++) {
+		cloneEl.querySelectorAll('.modalGraphEl')[i].style.height = cloneEl.querySelectorAll('.modalGraphEl')[i].style.height.split('%')[0] / 100 * 573 + "px";
+
+		for(let j=0 ; j<cloneEl.querySelectorAll('.modalGraphEl')[i].querySelectorAll('.modalGraphElStack').length ; j++) {
+			cloneEl.querySelectorAll('.modalGraphEl')[i].querySelectorAll('.modalGraphElStack')[j].style.height = cloneEl.querySelectorAll('.modalGraphEl')[i].querySelectorAll('.modalGraphElStack')[j].style.height.split('%')[0] / 100 * cloneEl.querySelectorAll('.modalGraphEl')[i].style.height + "px";
+		}
+	}
+
+	// 가장 아래에 있는 px값을 조회하여 maxHeight에 대입
+	for(let i=0 ; i<cloneEl.querySelectorAll('.modalStackDesc').length ; i++) {
+
+		if(maxHeight < Number(cloneEl.querySelectorAll('.modalStackDesc')[i].style.top.split('px')[0])) {
+			maxHeight = Number(cloneEl.querySelectorAll('.modalStackDesc')[i].style.top.split('px')[0]);
+		}
+	}
+
+	cloneEl.style.height = maxHeight + 70 + "px";
 
     html2canvas(cloneEl).then(function (canvas) {
         var myImage = canvas.toDataURL();
         downloadURI(myImage, DateText(today) + "_mabc_detail_map_" + fileName + ".png");
     });
+
 }
+
 function downloadURI(uri, name) {
-    var link = document.createElement("a")
+    var link = document.createElement("a");
     link.download = name;
     link.href = uri;
     document.body.appendChild(link);
@@ -1369,6 +1494,7 @@ function initAnimation() {
 var cnt=0;
 function drawModalGraph(_graphName) {
 
+
     // 데이터 변환 작업
     var graphName = chartDataArr[_graphName];
 	var graphName2 = chartDataArr2[_graphName];
@@ -1376,16 +1502,15 @@ function drawModalGraph(_graphName) {
     modalGraph_scale.innerHTML = "";
     let modalGraphData = {};
 
-
 	//염색체 순서 정렬(오름차순)
 	function compare_lname(a,b) {
 		if ( a.chr < b.chr){
-		return -1;
+			return -1;
 		}
 		if ( a.chr > b.chr){
-		return 1;
+			return 1;
 		}
-		return 0;
+			return 0;
 	}
 	chartDataArr[_graphName].sort(compare_lname);
 
@@ -1401,29 +1526,6 @@ function drawModalGraph(_graphName) {
             chr: graphName[i].chr
         })
     }
-	
-
-	/*
-	for (var i = 0; i < graphName2.length; i++) {
-        modalGraphData[graphName2[i].chr] = modalGraphData[graphName2[i].chr] ? modalGraphData[graphName2[i].chr] : [];
-        modalGraphData[graphName2[i].chr].push({
-            pos: graphName2[i].pos,
-            name: graphName2[i].name,
-            type: graphName2[i].type,
-            chr: graphName2[i].chr
-        })
-    }
-	*/
-
-	//console.log("modalGraphData : ", modalGraphData);
-
-	/*
-    for (var key in lengthData) {
-        lengthData[key] = 0;
-    }
-	*/
-	//console.log("lengthData : ", lengthData);
-	
 
     for (let key in modalGraphData) {
         modalGraphData[key].sort(function (a, b) { return a.pos - b.pos; });
@@ -1441,9 +1543,6 @@ function drawModalGraph(_graphName) {
     }
 
 	//console.log(JSON.stringify(modalGraphData));
-
-
-	
 
 
     // 그래프 그리기 
@@ -1542,7 +1641,6 @@ function drawModalGraph(_graphName) {
         var marinLeft = 0;
 
 
-
         for (var i = 0; i < stackDescEls.length; i++) {
 
 
@@ -1608,6 +1706,8 @@ function drawModalGraph(_graphName) {
 			mabcModalSelect.appendChild(selectOption);
 		}
 	}
+	// 모달창에서 나갔다가 다시 들어가면 Select가 사라지는 현상 발견
+	// cnt++를 주석화하였으나 모달창의 목록을 바꿨을때 리스트가 누적되는 현상 발생 => 염색체 더블클릭시 cnt=0 코드를 추가한다. 문제시 이 부분을 삭제
 	cnt++;
 }
 function closeMOdal() {

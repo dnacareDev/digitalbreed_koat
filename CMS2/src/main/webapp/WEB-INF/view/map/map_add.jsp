@@ -208,7 +208,7 @@
                                     </div>
                                     <input type="text" class="file_text" placeholder="" readonly disabled>
                                     <form action="insertOutcomeResult" id="insertForm" method="POST" enctype="multipart/form-data">
-                                    	<input id="input-file" type="file" class="addMabcFile" onchange="readUserExcel()" name="file">
+										<input id="input-file" type="file" class="addMabcFile" onchange="readUserExcel()" name="file">
                                     </form>
                                     <div class="flie_btn_box">
                                         <label for="input-file" class="file_add">파일첨부</label>
@@ -224,7 +224,10 @@
 	                           </div>
                            	</div>
                             <div class="view">
-                                <button class="commonBtn" onclick="onClickView(1);">분자표지맵 분석실행</button>
+                                <!--
+								<button class="commonBtn" onclick="onClickView(1);">분자표지맵 분석실행</button>
+								-->
+								<button class="commonBtn" onclick="onClickView_2(1);">분자표지맵 분석실행</button>
                             </div>
                             <p class="give_info"></p>
                             <input type="hidden" id="user_username" name="user_username" value="<c:out value='${user.user_username}'/>">
@@ -501,6 +504,7 @@
 					}
 					
 					onChangeVersion();
+					
 					$(".give_info").text(result[0].marker_credit);
 				}
 			});

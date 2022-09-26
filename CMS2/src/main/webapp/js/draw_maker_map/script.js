@@ -216,7 +216,7 @@ function getExcelTitleFromData(data,search){
 function parsingData(xlsxData){
     console.log("---------------")
     console.log(xlsxData);
-    console.log(parseData);
+    //console.log(parseData);
 
     // 염색체 대분류 나누기
     let bigParseData = {}
@@ -324,6 +324,7 @@ function readUserExcel_default() {
 }
 
 function readUserExcel() {
+
     var input = event.target;
     var reader = new FileReader();
     reader.onload = function () {
@@ -350,7 +351,7 @@ function readUserExcel() {
 
         userXlsxData = xlsxData;
 
-        parsingUserData(xlsxData);
+        //parsingUserData(xlsxData);
         // })
     };
     reader.readAsBinaryString(input.files[0]);
@@ -1052,6 +1053,12 @@ function onChangeToggle(e){
     }
 }
 
+function onClickView_2(e) {
+	parsingData(adminXlsxData);
+	parsingUserData(userXlsxData);
+	onClickView(e);
+}
+
 function onClickView(e)
 {
 	
@@ -1436,7 +1443,15 @@ function downloadTableImg(){
 	
 	let checkedArr = [];
 	
-	checkedArr.push(["염색체명","분자표지명","위치(bp)"]);
+	
+	// admin, user 구분하는 코드. .out_list의 숫자가 2개면 일반유저, 4개면 admin
+	const out_list_count = document.getElementsByClassName('out_list').length;
+	if(out_list_count ==2) {
+		checkedArr.push(["염색체명","분자표지명","위치(Mbp)"]);
+	} else {
+		checkedArr.push(["염색체명","분자표지명","위치(bp)"]);
+	}
+	
 	for(let i=0 ; i<$(".tableInput").length; i++) {
 		if( $(".tableInput")[i].checked ) {
 			checkedArr.push(GeneticDB[i]);
@@ -1692,12 +1707,14 @@ function onChangeVersion(){
     readGffFile();
 
 
+
     _checkRenderInterval = setInterval(function(){
         if(_giffLoad && _lenLoad){
             readMakerFile();
             clearInterval(_checkRenderInterval);
         }
     }, 500);
+
 }
 
 
@@ -1821,7 +1838,7 @@ function readMakerFile()
                 var rows = XLSX.utils.sheet_to_json(workBook.Sheets[workBook.SheetNames[0]]);
                 var xlsxData = JSON.parse(JSON.stringify(rows));
                 adminXlsxData = xlsxData;
-                parsingData(xlsxData);
+                //parsingData(xlsxData);
                 // })
             };
             reader.readAsBinaryString(file);

@@ -231,11 +231,38 @@
 						var item = {"outcome_id" : result.outcome[i].outcome_id,
 									"marker_crop" : result.outcome[i].marker_crop,
 									"marker_version" : result.outcome[i].marker_version,
-									"outcome_status" : result.outcome[i].outcome_status == 1 ? "분석 완료" : "분석중",
+									//"outcome_status" : result.outcome[i].outcome_status == 1 ? "분석 완료" : "분석중",
+									//"outcome_status" : result.outcome[i].outcome_status,
 									"outcome_comment" : result.outcome[i].outcome_comment,
 									"outcome_origin_file" : result.outcome[i].outcome_origin_file,
 									"create_date" : result.outcome[i].create_date};
 						
+						switch(result.outcome[i].outcome_status) {
+							case 1 : 
+								item["outcome_status"] = "샘플 분석중(1/4)";
+								break;
+							case 2 : 
+								item["outcome_status"] = "변이 분석중(2/4)";
+								break;
+							case 3 : 
+								item["outcome_status"] = "결과 출력중(3/4)";
+								break;
+							case 4 :
+								item["outcome_status"] = "분석 완료";
+								break;
+							case 5 :
+								item["outcome_status"] = "분석 실패";
+								break;
+							/*
+							default : 
+								item["outcome_status"] = result.outcome[i].outcome_status + " - (확인되지 않은 분류)";
+							*/
+						}
+						
+						//console.log(result.outcome[i].outcome_status);
+
+						//item["outcome_status"] = result.outcome[i].outcome_status;
+
 						outcome_list.push(item);
 					}
 					
