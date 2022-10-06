@@ -164,6 +164,7 @@ public class NgsController
 		}
 		
 		String marker_file = service.SelectMarkerFileName(marker_id);
+		String excel_file = service.SelectExcelFileName(marker_id);
 		
 		try
 		{
@@ -176,7 +177,8 @@ public class NgsController
 			
 			CompletableFuture.runAsync(() -> {
 			    RunMABC runmabc = new RunMABC();
-				runmabc.MakeRunMABC(date_name, "/data/apache-tomcat-9.0.8/webapps/ROOT" + marker_file, dad_name, mom_name);
+				//runmabc.MakeRunMABC(date_name, "/data/apache-tomcat-9.0.8/webapps/ROOT" + marker_file, dad_name, mom_name);
+			    runmabc.MakeRunMABC(date_name, "/data/apache-tomcat-9.0.8/webapps/ROOT" + marker_file, dad_name, mom_name, "/data/apache-tomcat-9.0.8/webapps/ROOT" + excel_file);
 			});
 			
 		}

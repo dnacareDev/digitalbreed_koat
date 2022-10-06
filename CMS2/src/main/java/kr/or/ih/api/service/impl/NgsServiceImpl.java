@@ -48,6 +48,12 @@ public class NgsServiceImpl implements NgsService
 	}
 	
 	@Override
+	public String SelectExcelFileName(int marker_id)
+	{
+		return mapper.SelectExcelFileName(marker_id);
+	}
+	
+	@Override
 	public Outcome SelectOutcome(int outcome_id)
 	{
 		return mapper.SelectOutcome(outcome_id);

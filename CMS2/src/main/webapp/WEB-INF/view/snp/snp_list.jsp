@@ -236,13 +236,13 @@
 						
 						switch(result.outcome[i].outcome_status) {
 							case 1 : 
-								item["outcome_status"] = "샘플 분석중";
+								item["outcome_status"] = "샘플 분석중(1/4)";
 								break;
 							case 2 : 
-								item["outcome_status"] = "변이 분석중";
+								item["outcome_status"] = "변이 분석중(2/4)";
 								break;
 							case 3 : 
-								item["outcome_status"] = "결과 출력중";
+								item["outcome_status"] = "결과 출력중(3/4)";
 								break;
 							case 4 :
 								item["outcome_status"] = "분석 완료";

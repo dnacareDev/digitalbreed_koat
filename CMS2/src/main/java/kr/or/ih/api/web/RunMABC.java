@@ -6,29 +6,17 @@ import java.text.*;
 
 public class RunMABC  {
     
-	public  void MakeRunMABC(String jobid, String refdb_path, String female, String male) {
+	//public  void MakeRunMABC(String jobid, String refdb_path, String female, String male) {
+	public  void MakeRunMABC(String jobid, String refdb_path, String female, String male, String excel_path) {
 
-		/*public static void main(String[] args) {
-
-		String jobid =args[0];
-		String refdb_path =args[1];
-		String female = null;
-		String male = null;
-
-		try{
-		 female =args[2];
-		 } catch (Exception e) {
-            e.printStackTrace();
-        }
-		try{
-		 male =args[3];
-		 } catch (Exception e) {
-            e.printStackTrace();
-        }*/
 		refdb_path = refdb_path.replace("digit/","");
+		excel_path = excel_path.replace("digit/","");
+		
+		//System.out.println("excel_path : " + excel_path);
 
 		//String work_dir ="/data/apache-tomcat-9.0.8/webapps/ROOT/common/r/result/"+jobid+"/";
-
+		
+		
 		String work_dir =refdb_path.substring(0, refdb_path.lastIndexOf("/"))+"/";
 
 		String out_work_dir =refdb_path.substring(refdb_path.lastIndexOf("/")+1, refdb_path.lastIndexOf("."));
@@ -39,7 +27,7 @@ public class RunMABC  {
 		boolean isExists = file.exists();
 		if(!isExists) {
 			String cmd_index = "python3  /data/apache-tomcat-9.0.8/webapps/ROOT/common/web/snpanalysis/AT00_refIndex.py -r  "+ refdb_path + " -o " + out_work_dir;
-		System.out.println(" cmd_index cmd : " + cmd_index);
+			System.out.println(" cmd_index cmd : " + cmd_index);
 
 			execute(cmd_index);
 		}
@@ -55,6 +43,7 @@ public class RunMABC  {
 		try{
 		if(!female.equals(null) && !male.equals(null))
 			cmd1 = "python3 /data/apache-tomcat-9.0.8/webapps/ROOT/common/web/snpanalysis/AT02_abh.py -o "+jobid+" -f "+female+" -m "+male;
+			cmd1 = "python3 /data/apache-tomcat-9.0.8/webapps/ROOT/common/web/snpanalysis/AT02_abh.py -o "+jobid+" -f "+female+" -m "+male+ " -v " +excel_path.replace(".xlsx", ".csv");
 			System.out.println(" cmd1 cmd : " + cmd1);
 
 			execute(cmd1);
@@ -62,7 +51,6 @@ public class RunMABC  {
         } catch (NullPointerException e) {
         	System.out.println("error");
         }
-		
     }
 
 	 public static void execute(String cmd) {

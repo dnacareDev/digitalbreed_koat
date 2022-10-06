@@ -46,6 +46,11 @@
 		WHERE marker_id = #{marker_id} AND marker_file_type = 0
 	</select>
 	
+	<select id="SelectExcelFileName" parameterType="int" resultType="String">
+		SELECT marker_file FROM marker_file
+		WHERE marker_id = #{marker_id} AND marker_file_type = 3
+	</select>
+	
 	<select id="SelectOutcome" parameterType="int" resultType="kr.or.ih.api.entity.Outcome">
 		SELECT * FROM outcome o
 		LEFT JOIN marker m ON o.marker_id = m.marker_id

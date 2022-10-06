@@ -17,6 +17,8 @@ public interface NgsService
 	List<Marker> SelectMarkerVersion(String marker_crop);
 	
 	String SelectMarkerFileName(int marker_id);
+	
+	String SelectExcelFileName(int marker_id);
 
 	Outcome SelectOutcome(int outcome_id);
 }

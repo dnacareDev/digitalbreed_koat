@@ -167,7 +167,7 @@
                     	<form action="InsertPhylogeny" id="insertForm" method="POST" enctype="multipart/form-data">
 	                        <div class="input_file_wrap">
 	                            <input type="text" class="file_text" placeholder="" readonly disabled>
-	                            <input id="input-file" type="file" class="addMabcFile" name="file" accept=".xlsx">
+	                            <input id="input-file" type="file" class="addMabcFile" name="file" >
 	                            <div class="flie_btn_box">
 	                                <label for="input-file" class="file_add">파일첨부</label>
 	                            </div>

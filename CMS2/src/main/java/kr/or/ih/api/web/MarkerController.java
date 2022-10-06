@@ -374,6 +374,16 @@ public class MarkerController
         		file.setMarker_origin_file(marker_file.getOriginalFilename());
         		
         		int file_result = service.InsertMarkerFile(file);
+        		
+        		
+        		
+        		String xlsxFile = path + "/" + marker_name;
+        		
+        		String cmd = "ssconvert " + xlsxFile + " " + xlsxFile.replace(".xlsx", ".csv");
+        		
+        		/*csv변환 스크립트 실행*/
+        		System.out.println(cmd);
+        		RunMABC.execute(cmd);
         	}
         }
         catch(IOException e)
@@ -471,6 +481,16 @@ public class MarkerController
         		file.setMarker_origin_file(marker_file.getOriginalFilename());
         		
         		int file_result = service.UpdateMarkerFile(file);
+        		
+        		
+        		
+        		String xlsxFile = path + "/" + marker_name;
+        		
+        		String cmd = "ssconvert " + xlsxFile + " " + xlsxFile.replace(".xlsx", ".csv");
+        		
+        		/*csv변환 스크립트 실행*/
+        		System.out.println(cmd);
+        		RunMABC.execute(cmd);
         	}
         }
         catch(IOException e)
